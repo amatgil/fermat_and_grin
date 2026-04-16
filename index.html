@@ -13,17 +13,16 @@
     </head>
     <body onload="start()">
         <canvas id="c" style="border: 2px solid #000000"></canvas>
-
         <div>
-            <label>Amplitude: </label>
-            <input
-                id="amplitude"
-                type="range"
-                max="1"
-                min="-1"
-                step="0.01"
-                value="0"
-            />
+            <label>Indexs de refracció</label>
+            <button id="start_animation_button">Inicia Descent</button>
+            <button id="stop_animation_button">Para Descent</button>
+        </div>
+        <div>
+            <label>Indexs de refracció</label>
+            <button id="add_index_refrac">Afegeix index</button>
+            <button id="remove_index_refrac">Elimina index</button>
+            <div id="input_ns"></div>
         </div>
     </body>
 </html>

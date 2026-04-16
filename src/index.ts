@@ -12,18 +12,24 @@ export class ExperimentFermat {
   ray_start: Vec2;
   ray_end: Vec2;
   ns: number[];
+  media_change_verticals: number[];
   g: CanvasRenderingContext2D;
   g_width: number;
   g_height: number;
+  descent_timer_id: null | number;
+  temps_entre_steps_del_descent: number;
 
   // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
     this.g = g;
-    this.ray_start = new Vec2(0, 0.6);
-    this.ray_end = new Vec2(1, 0.3);
+    this.ray_start = new Vec2(0, 0.6); // normalitzades
+    this.ray_end = new Vec2(1, 0.3); // normalitzades
     this.ns = [1, 1.33, 1]; // inclou el primer '1' sempre
+    this.media_change_verticals = [0.5, 0.5, 0.5]; // l'últim és la target!
     this.g_width = width;
     this.g_height = height;
+    this.descent_timer_id = null;
+    this.temps_entre_steps_del_descent = 0.2; // en segons
   }
 
   set_default_parameters() {
@@ -58,11 +64,11 @@ export class ExperimentFermat {
     return ret;
   }
 
-  compute_time(media_change_verticals: number[]): number {
+  compute_time(): number {
     let ret: number = 0;
 
     const num_transicions = this.ns.length;
-    if (media_change_verticals.length != num_transicions) {
+    if (this.media_change_verticals.length != num_transicions) {
       throw Error("media change vertical no correspon amb ns");
     }
 
@@ -70,7 +76,7 @@ export class ExperimentFermat {
     for (let i = 0; i < num_transicions; ++i) {
       let meeting_point = new Vec2(
         (i + 1) / num_transicions,
-        media_change_verticals[i],
+        this.media_change_verticals[i],
       );
 
       let dist = Vec2.sub(meeting_point, prev_point).length();
@@ -82,9 +88,9 @@ export class ExperimentFermat {
     return ret;
   }
 
-  draw_ray(media_change_verticals: number[]) {
+  draw_ray() {
     this.g.strokeStyle = "red";
-    let punts = this.compute_ray(media_change_verticals);
+    let punts = this.compute_ray(this.media_change_verticals);
     this.g.beginPath();
     this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
     for (let p of punts.slice(1)) {
@@ -105,6 +111,31 @@ export class ExperimentFermat {
       this.g.stroke();
     }
   }
+
+  start_descent() {
+    console.log("Iniciant el descent");
+    if (!(this.descent_timer_id === null)) {
+      console.log("Ja estavem descendint");
+    }
+    this.descent_timer_id = setInterval(
+      this.step_descent,
+      this.temps_entre_steps_del_descent * 1000,
+    );
+  }
+
+  step_descent() {
+    console.log("stepping");
+  }
+
+  stop_descent() {
+    console.log("Parant el descent");
+    if (this.descent_timer_id === null) {
+      // no estavem fent res
+    } else {
+      clearTimeout(this.descent_timer_id);
+      this.descent_timer_id = null;
+    }
+  }
 }
 
 function start() {
@@ -121,9 +152,9 @@ function start() {
   let experiment = new ExperimentFermat(g, width, height);
   init_listeners(experiment);
 
-  experiment.draw_ray([0.8, 0.2, 0.6]);
+  experiment.draw_ray();
   experiment.draw_media_transitions();
-  console.log(experiment.compute_time([0.8, 0.2, 0.6]));
+  console.log(experiment.compute_time());
 }
 
 (window as any).start = start;
