@@ -13,18 +13,45 @@ export function init_listeners(exp: ExperimentFermat) {
     exp.stop_descent();
   });
   button_add_ns?.addEventListener("click", () => {
-    const nss = document.getElementById("input_ns");
-    const n = document.createElement("input");
-    n.min = "1";
-    n.max = "2";
-    n.step = "0.01";
-    n.value = "1.33";
-    n.type = "range";
-    nss?.appendChild(n);
+    {
+      const nss = document.getElementById("input_ns");
+      const n = document.createElement("input");
+      n.min = "1";
+      n.max = "2";
+      n.step = "0.01";
+      n.value = "1.33";
+      n.type = "range";
+      n.addEventListener("change", () => {
+        exp.redraw();
+      });
+      nss?.appendChild(n);
+    }
+    {
+      const hs = document.getElementById("input_heights");
+      const h = document.createElement("input");
+      h.min = "0";
+      h.max = "1";
+      h.step = "0.01";
+      h.value = "0.5";
+      h.type = "range";
+      h.addEventListener("change", () => {
+        exp.redraw();
+      });
+      hs?.appendChild(h);
+    }
+    exp.redraw();
   });
   button_rm_ns?.addEventListener("click", () => {
-    const nss = document.getElementById("input_ns");
-    if (nss?.childElementCount === 0) return;
-    nss?.removeChild(nss.lastChild!);
+    {
+      const nss = document.getElementById("input_ns");
+      if (nss?.childElementCount === 0) return;
+      nss?.removeChild(nss.lastChild!);
+    }
+    {
+      const hs = document.getElementById("input_heights");
+      if (hs?.childElementCount === 0) return;
+      hs?.removeChild(hs.lastChild!);
+    }
+    exp.redraw();
   });
 }

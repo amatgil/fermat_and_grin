@@ -136,11 +136,54 @@ export class ExperimentFermat {
       this.descent_timer_id = null;
     }
   }
+
+  redraw() {
+    this.refresh_inputs();
+    this.g.clearRect(0, 0, this.g_width, this.g_height);
+    this.draw_ray();
+    this.draw_media_transitions();
+  }
+
+  // Refresca indexs i heights
+  refresh_inputs() {
+    {
+      const nss = document.getElementById("input_ns");
+      let indexs: number[] = [];
+      if (nss?.childNodes === undefined) {
+        throw Error("Whoopsie");
+      }
+
+      for (const child of nss?.childNodes) {
+        if (child instanceof HTMLInputElement) {
+          indexs.push(Number(child.value));
+        } else {
+          throw Error("Unreachable");
+        }
+      }
+      this.ns = indexs;
+    }
+    {
+      const hs = document.getElementById("input_heights");
+      let heights: number[] = [];
+      if (hs?.childNodes === undefined) {
+        throw Error("Whoopsie");
+      }
+
+      for (const child of hs?.childNodes) {
+        if (child instanceof HTMLInputElement) {
+          heights.push(Number(child.value));
+        } else {
+          throw Error("Unreachable");
+        }
+      }
+      this.media_change_verticals = heights;
+    }
+  }
 }
 
 function start() {
   console.log("And then we fermat all over the place");
-  let canvas = document.getElementById("c") as HTMLCanvasElement;
+  const canvas = document.getElementById("c") as HTMLCanvasElement;
 
   const width = window.innerWidth * 0.7;
   const height = window.innerHeight * 0.7;
@@ -148,12 +191,11 @@ function start() {
   canvas.width = width;
   canvas.height = height;
 
-  let g = canvas.getContext("2d") as CanvasRenderingContext2D;
-  let experiment = new ExperimentFermat(g, width, height);
+  const g = canvas.getContext("2d") as CanvasRenderingContext2D;
+  const experiment = new ExperimentFermat(g, width, height);
   init_listeners(experiment);
 
-  experiment.draw_ray();
-  experiment.draw_media_transitions();
+  experiment.redraw();
   console.log(experiment.compute_time());
 }
 
