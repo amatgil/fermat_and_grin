@@ -13,12 +13,11 @@
     </head>
     <body onload="start()">
         <canvas id="c" style="border: 2px solid #000000"></canvas>
-        <div>
-            <label>Indexs de refracció</label>
-            <button id="start_animation_button">Inicia Descent</button>
-            <button id="stop_animation_button">Para Descent</button>
+        <div style="border: 2px solid black; width: fit-content; padding: 5px">
+            <label>Temps</label>
+            <div><span id="time_taken">0</span><span>s</span></div>
         </div>
-        <div>
+        <div style="border: 2px solid black; width: fit-content">
             <label>Valors per secció</label>
             <button id="add_index_refrac">Afegeix-ne</button>
             <button id="remove_index_refrac">Elimina'n</button>
@@ -30,6 +29,11 @@
                 <label>Punt de transició</label>
                 <div id="input_heights"></div>
             </div>
+        </div>
+        <div style="border: 2px solid black; width: fit-content">
+            <label>Indexs de refracció</label>
+            <button id="start_animation_button">Inicia Descent</button>
+            <button id="stop_animation_button">Para Descent</button>
         </div>
     </body>
 </html>

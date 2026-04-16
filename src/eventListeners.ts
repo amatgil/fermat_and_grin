@@ -21,7 +21,7 @@ export function init_listeners(exp: ExperimentFermat) {
       n.step = "0.01";
       n.value = "1.33";
       n.type = "range";
-      n.addEventListener("change", () => {
+      n.addEventListener("input", () => {
         exp.redraw();
       });
       nss?.appendChild(n);
@@ -34,7 +34,7 @@ export function init_listeners(exp: ExperimentFermat) {
       h.step = "0.01";
       h.value = "0.5";
       h.type = "range";
-      h.addEventListener("change", () => {
+      h.addEventListener("input", () => {
         exp.redraw();
       });
       hs?.appendChild(h);

@@ -112,6 +112,24 @@ export class ExperimentFermat {
     }
   }
 
+  draw_media_backgrounds() {
+    const num_transicions = this.ns.length;
+    for (let i = 0; i < num_transicions; ++i) {
+      let x = (i / num_transicions) * this.g_width;
+      let a = this.ns[i] - 1; // perquè els limits son 1 i 2
+      this.g.fillStyle = `rgba(1, 1, 1, ${a})`;
+      this.g.beginPath();
+      this.g.fillRect(
+        x,
+        0,
+        (1 / num_transicions) * this.g_width,
+        this.g_height,
+      );
+      console.log(a, x, 0, (1 / num_transicions) * this.g_width, this.g_height);
+      this.g.stroke();
+    }
+  }
+
   start_descent() {
     console.log("Iniciant el descent");
     if (!(this.descent_timer_id === null)) {
@@ -140,6 +158,7 @@ export class ExperimentFermat {
   redraw() {
     this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
+    this.draw_media_backgrounds();
     this.draw_ray();
     this.draw_media_transitions();
   }
@@ -185,7 +204,7 @@ function start() {
   console.log("And then we fermat all over the place");
   const canvas = document.getElementById("c") as HTMLCanvasElement;
 
-  const width = window.innerWidth * 0.7;
+  const width = window.innerWidth * 0.9;
   const height = window.innerHeight * 0.7;
 
   canvas.width = width;
