@@ -12,62 +12,12 @@
         </style>
     </head>
     <body onload="start()">
-        <canvas
-            id="c"
-            style="border-color: #000000; border-width: 10px"
-        ></canvas>
+        <canvas id="c" style="border: 2px solid #000000"></canvas>
 
-        <div style="display: flex; flex-direction: vertical">
+        <div>
             <label>Amplitude: </label>
             <input
                 id="amplitude"
-                type="range"
-                max="1"
-                min="-1"
-                step="0.01"
-                value="0"
-            />
-        </div>
-
-        <div style="display: flex; flex-direction: vertical">
-            <label>Lambda (Wave-length): </label>
-            <input
-                id="lambda"
-                type="range"
-                max="1"
-                min="-1"
-                step="0.01"
-                value="0"
-            />
-        </div>
-
-        <div style="display: flex; flex-direction: vertical">
-            <label>Slit-Slit distance: </label>
-            <input
-                id="slit-slit"
-                type="range"
-                max="1"
-                min="-1"
-                step="0.01"
-                value="0"
-            />
-        </div>
-
-        <div style="display: flex; flex-direction: vertical">
-            <label>Slits-Plane distance: </label>
-            <input
-                id="slits-plane"
-                type="range"
-                max="1"
-                min="-1"
-                step="0.01"
-                value="0"
-            />
-        </div>
-        <div style="display: flex; flex-direction: vertical">
-            <label>Integral iterations: </label>
-            <input
-                id="iter"
                 type="range"
                 max="1"
                 min="-1"

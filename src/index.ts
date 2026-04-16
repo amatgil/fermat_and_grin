@@ -1,151 +1,129 @@
-import { Vec3 } from "./Vec3.js";
+import { Vec2 } from "./Vec2.js";
 import { init_listeners } from "./eventListeners.js";
 
 const REAL_WIDTH: number = 10;
 const REAL_HEIGHT: number = 5;
 
-const mm_to_amstrong = 10_000_000;
-const PI = 3.14159265358979323;
+const TAU = 6.28318530717958647692;
+const PI = TAU / 2;
 
-export class Experiment {
-  static readonly default_lambda = 5000; // Amstrongs
-  static readonly default_a = 0.1; // mm
-  static readonly default_L = 200; // mm
-  static readonly default_T = 2 * PI; // radians
-  static readonly default_A = 300; // N/C
-  static readonly default_iter = 10;
-
-  lambda: number; // Amstrongs
-  a: number; // mm
-  L: number; // mm
-  T: number; // radians
-  A: number; // Amplitude (N / C)
-  iter: number; // iteration count
-  slits: Vec3[];
-
+// TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
+export class ExperimentFermat {
+  ray_start: Vec2;
+  ray_end: Vec2;
+  ns: number[];
   g: CanvasRenderingContext2D;
-  width: number;
-  height: number;
+  g_width: number;
+  g_height: number;
 
+  // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
-    this.lambda = Experiment.default_lambda; // Amstrongs
-    this.a = Experiment.default_a; // mm
-    this.L = Experiment.default_L; // mm
-    this.T = Experiment.default_T; // radians
-    this.A = Experiment.default_A; // N/C
-    this.iter = Experiment.default_iter; // # iterations
-
-    let S1: Vec3 = new Vec3(this.a / 2, 0, 0);
-    let S2: Vec3 = new Vec3(-this.a / 2, 0, 0);
-    this.slits = [S1, S2];
-
     this.g = g;
-    this.width = width;
-    this.height = height;
+    this.ray_start = new Vec2(0, 0.6);
+    this.ray_end = new Vec2(1, 0.3);
+    this.ns = [1, 1.33, 1]; // inclou el primer '1' sempre
+    this.g_width = width;
+    this.g_height = height;
   }
 
   set_default_parameters() {
-    this.lambda = 5000; // Amstrongs
-    this.a = 0.1; // mm
-    this.L = 200; // mm
-    this.T = 2 * PI;
-    this.A = 300;
-
-    let S1: Vec3 = new Vec3(this.a / 2, 0, 0);
-    let S2: Vec3 = new Vec3(-this.a / 2, 0, 0);
-    let S3: Vec3 = new Vec3(0, this.a / 2, 0);
-    let S4: Vec3 = new Vec3(0, -this.a / 2, 0);
-    this.slits = [S1, S2, S3, S4];
+    // TODO
+  }
+  overlay_snell() {
+    // TODO
   }
 
-  recalculate_slits() {
-    let S1: Vec3 = new Vec3(this.a / 2, 0, 0);
-    let S2: Vec3 = new Vec3(-this.a / 2, 0, 0);
-    this.slits = [S1, S2];
+  // Retorna el path que seguirà segons tots els rays
+  compute_ray(
+    // percentatge, [0..1] (varia aleatoriament)
+    // és important que la seva length sigui this.ns.length
+    media_change_verticals: number[],
+  ): Vec2[] {
+    let ret: Vec2[] = [];
 
-    let S3: Vec3 = new Vec3(this.a / 2, this.a / 2, 0);
-    let S4: Vec3 = new Vec3(0, -this.a / 2, 0);
-    this.slits = [S1, S2, S3, S4];
-  }
-
-  static to_world_space(
-    i: number,
-    j: number,
-    width: number,
-    height: number,
-  ): [number, number] {
-    let x = (i / width) * REAL_WIDTH - REAL_WIDTH / 2;
-    let y = (j / height) * REAL_HEIGHT - REAL_HEIGHT / 2;
-    return [x, y];
-  }
-
-  electric_field(r: Vec3, j: number, M: number): number {
-    let N = this.slits.length;
-    let S = 0;
-    for (let src of this.slits) {
-      const Amplitude = this.A / Vec3.distance(src, r);
-      const Phase =
-        (Vec3.distance(src, r) * mm_to_amstrong) / this.lambda - j / this.T;
-
-      S += Amplitude * Math.cos(2 * PI * Phase);
-    }
-    return S;
-  }
-
-  intensitat_E(M: number, r: Vec3): number {
-    let Sum = 0;
-    for (let j = 0; j < M; ++j) {
-      const E = this.electric_field(r, j, M);
-      Sum += E * E;
-    }
-    return Sum / M;
-  }
-
-  draw_interference_pattern(): void {
-    let pixels: Uint8ClampedArray = new Uint8ClampedArray(
-      4 * this.width * this.height,
-    );
-
-    let [min_I, max_I] = [10e7, 10e-7];
-    for (let j = 0; j < this.height; ++j) {
-      for (let i = 0; i < this.width; ++i) {
-        let [x, y] = Experiment.to_world_space(i, j, this.width, this.height);
-        let p = 4 * (j * this.width + i);
-
-        let I = this.intensitat_E(this.iter, new Vec3(x, y, this.L));
-
-        min_I = Math.min(min_I, I);
-        max_I = Math.max(max_I, I);
-
-        pixels[p + 0] = 255 * I;
-        pixels[p + 1] = 255 * I;
-        pixels[p + 2] = 255 * I;
-        pixels[p + 3] = 255 * I;
-      }
+    const num_transicions = this.ns.length;
+    if (media_change_verticals.length != num_transicions) {
+      throw Error("media change vertical no correspon amb ns");
     }
 
-    let image: ImageData = new ImageData(pixels, this.width, this.height, {
-      colorSpace: "srgb",
-    });
-    this.g.putImageData(image, 0, 0);
+    ret.push(this.ray_start);
+    for (let i = 0; i < num_transicions; ++i) {
+      let meeting_point = new Vec2(
+        (i + 1) / num_transicions,
+        media_change_verticals[i],
+      );
+      ret.push(meeting_point);
+    }
+
+    return ret;
+  }
+
+  compute_time(media_change_verticals: number[]): number {
+    let ret: number = 0;
+
+    const num_transicions = this.ns.length;
+    if (media_change_verticals.length != num_transicions) {
+      throw Error("media change vertical no correspon amb ns");
+    }
+
+    let prev_point = this.ray_start;
+    for (let i = 0; i < num_transicions; ++i) {
+      let meeting_point = new Vec2(
+        (i + 1) / num_transicions,
+        media_change_verticals[i],
+      );
+
+      let dist = Vec2.sub(meeting_point, prev_point).length();
+      let vel = 1 / this.ns[i];
+      ret += dist / vel;
+      prev_point = meeting_point;
+    }
+
+    return ret;
+  }
+
+  draw_ray(media_change_verticals: number[]) {
+    this.g.strokeStyle = "red";
+    let punts = this.compute_ray(media_change_verticals);
+    this.g.beginPath();
+    this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
+    for (let p of punts.slice(1)) {
+      this.g.lineTo(p.x * this.g_width, p.y * this.g_height);
+    }
+    this.g.stroke();
+  }
+
+  draw_media_transitions() {
+    const num_transicions = this.ns.length;
+    this.g.strokeStyle = "blue";
+    for (let i = 0; i < num_transicions; ++i) {
+      let x = ((i + 1) / num_transicions) * this.g_width;
+      let y = this.g_height;
+      this.g.beginPath();
+      this.g.moveTo(x, 0);
+      this.g.lineTo(x, y);
+      this.g.stroke();
+    }
   }
 }
 
 function start() {
-  console.log("Hello world!");
+  console.log("And then we fermat all over the place");
   let canvas = document.getElementById("c") as HTMLCanvasElement;
 
-  const width = 100; //canvas.clientWidth;
-  const height = 100; //canvas.clientHeight;
+  const width = window.innerWidth * 0.7;
+  const height = window.innerHeight * 0.7;
 
   canvas.width = width;
   canvas.height = height;
 
   let g = canvas.getContext("2d") as CanvasRenderingContext2D;
-  let experiment: Experiment = new Experiment(g, width, height);
+  let experiment = new ExperimentFermat(g, width, height);
   init_listeners(experiment);
 
-  experiment.draw_interference_pattern();
+  experiment.draw_ray([0.8, 0.2, 0.6]);
+  experiment.draw_media_transitions();
+  console.log(experiment.compute_time([0.8, 0.2, 0.6]));
 }
 
 (window as any).start = start;
