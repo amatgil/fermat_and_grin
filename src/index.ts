@@ -22,7 +22,7 @@ export class ExperimentFermat {
   // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
     this.g = g;
-    this.ray_start = new Vec2(0, 0.6); // normalitzades
+    this.ray_start = new Vec2(0, 0.5); // normalitzades
     this.ray_end = new Vec2(1, 0.3); // normalitzades
     this.ns = [1, 1.33, 1]; // inclou el primer '1' sempre
     this.media_change_verticals = [0.5, 0.5, 0.5]; // l'últim és la target!
@@ -161,6 +161,11 @@ export class ExperimentFermat {
     this.draw_media_backgrounds();
     this.draw_ray();
     this.draw_media_transitions();
+    const time_report = document.getElementById("time_taken");
+    if (time_report === null) throw Error("algú ha borrat lo del temps");
+
+    console.log(this.compute_time().toString());
+    time_report.innerHTML = this.compute_time().toString();
   }
 
   // Refresca indexs i heights
@@ -201,7 +206,6 @@ export class ExperimentFermat {
 }
 
 function start() {
-  console.log("And then we fermat all over the place");
   const canvas = document.getElementById("c") as HTMLCanvasElement;
 
   const width = window.innerWidth * 0.9;
@@ -215,7 +219,6 @@ function start() {
   init_listeners(experiment);
 
   experiment.redraw();
-  console.log(experiment.compute_time());
 }
 
 (window as any).start = start;
