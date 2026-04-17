@@ -144,10 +144,9 @@ export class ExperimentFermat {
   }
 
   step_descent() {
-    console.log("stepping");
     let keep_going = true;
     let iterations = 0;
-    while (keep_going && iterations < 100) {
+    while (keep_going && iterations < 500) {
         const index_to_tweak = Math.floor(Math.random() * this.media_change_verticals.length);
 
         let delta = undefined;
@@ -156,8 +155,6 @@ export class ExperimentFermat {
 
         const old_h = this.media_change_verticals[index_to_tweak];
         const new_h = Math.max(0, Math.min(1, old_h + delta));
-
-        // console.log("Changing", index_to_tweak, "by", "from/to", old_h, new_h);
 
         const old_time = this.compute_time();
         this.media_change_verticals[index_to_tweak] = new_h;
@@ -169,9 +166,11 @@ export class ExperimentFermat {
         iterations += 1;
     }
     this.refresh_outputs();
-    console.log(this.media_change_verticals);
-
-      // TODO: if compute_time is low enough, kill the setinterval
+    if (iterations >= 500) {
+        // No hem fet progrès, cancelem
+        console.log("Parem de fer això")
+        this.stop_descent();
+    }
   }
 
   stop_descent() {
@@ -193,7 +192,6 @@ export class ExperimentFermat {
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
-    console.log(this.compute_time().toString());
     time_report.innerHTML = this.compute_time().toString();
   }
 
