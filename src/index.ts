@@ -7,6 +7,8 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
+const DELTA_IN_STEPS = 0.1;
+
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
 export class ExperimentFermat {
   ray_start: Vec2;
@@ -136,7 +138,7 @@ export class ExperimentFermat {
       console.log("Ja estavem descendint");
     } else {
       this.descent_timer_id = setInterval(
-        this.step_descent,
+        () => {this.step_descent()},
         this.temps_entre_steps_del_descent * 1000,
       );
     }
@@ -144,6 +146,34 @@ export class ExperimentFermat {
 
   step_descent() {
     console.log("stepping");
+    let keep_going = true;
+    let iterations = 0;
+    while (keep_going && iterations < 100) {
+        const index_to_tweak = Math.floor(Math.random() * this.media_change_verticals.length);
+
+        let delta = undefined;
+        if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
+        else                     delta =  DELTA_IN_STEPS;
+
+        const old_h = this.media_change_verticals[index_to_tweak];
+        const new_h = Math.max(0, Math.min(1, old_h + delta));
+
+        // console.log("Changing", index_to_tweak, "by", "from/to", old_h, new_h);
+
+        const old_time = this.compute_time();
+        this.media_change_verticals[index_to_tweak] = new_h;
+        const new_time = this.compute_time();
+
+        if (new_time <= old_time) keep_going = false;
+        else this.media_change_verticals[index_to_tweak] = old_h;
+
+        iterations += 1;
+    }
+    this.refresh_outputs();
+    this.redraw();
+    console.log(this.media_change_verticals);
+
+      // TODO: if compute_time is low enough, kill the setinterval
   }
 
   stop_descent() {
@@ -204,6 +234,40 @@ export class ExperimentFermat {
       this.media_change_verticals = heights;
     }
   }
+  refresh_outputs()
+    {
+      {
+          const nss = document.getElementById("input_ns");
+          if (nss?.childNodes === undefined) {
+              throw Error("Whoopsie");
+          }
+
+          nss.childNodes.forEach((child, i) => {
+              if (child instanceof HTMLInputElement) {
+                  child.value = this.ns[i].toString();
+              } else {
+                  throw Error("Unreachable");
+              }
+          });
+      }
+
+      {
+          const hs = document.getElementById("input_heights");
+          if (hs?.childNodes === undefined) {
+              throw Error("Whoopsie");
+          }
+
+          hs.childNodes.forEach((child, i) => {
+              if (child instanceof HTMLInputElement) {
+                  child.value = this.media_change_verticals[i].toString();
+              } else {
+                  throw Error("Unreachable");
+              }
+          });
+      }
+
+  }
+   
 }
 
 function start() {
