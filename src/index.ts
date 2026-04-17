@@ -134,11 +134,12 @@ export class ExperimentFermat {
     console.log("Iniciant el descent");
     if (!(this.descent_timer_id === null)) {
       console.log("Ja estavem descendint");
+    } else {
+      this.descent_timer_id = setInterval(
+        this.step_descent,
+        this.temps_entre_steps_del_descent * 1000,
+      );
     }
-    this.descent_timer_id = setInterval(
-      this.step_descent,
-      this.temps_entre_steps_del_descent * 1000,
-    );
   }
 
   step_descent() {
@@ -148,7 +149,7 @@ export class ExperimentFermat {
   stop_descent() {
     console.log("Parant el descent");
     if (this.descent_timer_id === null) {
-      // no estavem fent res
+      console.log("No hi havia cap timer actiu");
     } else {
       clearTimeout(this.descent_timer_id);
       this.descent_timer_id = null;
