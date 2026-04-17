@@ -147,7 +147,8 @@ export class ExperimentFermat {
     let keep_going = true;
     let iterations = 0;
     while (keep_going && iterations < 500) {
-        const index_to_tweak = Math.floor(Math.random() * this.media_change_verticals.length);
+        // Menys 1 per no permetre modificar la última (si no, passem a linia recta)
+        const index_to_tweak = Math.floor(Math.random() * (this.media_change_verticals.length-1));
 
         let delta = undefined;
         if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
