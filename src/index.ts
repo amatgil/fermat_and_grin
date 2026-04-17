@@ -7,7 +7,7 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.1;
+const DELTA_IN_STEPS = 0.01;
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
 export class ExperimentFermat {
@@ -31,7 +31,7 @@ export class ExperimentFermat {
     this.g_width = width;
     this.g_height = height;
     this.descent_timer_id = null;
-    this.temps_entre_steps_del_descent = 0.2; // en segons
+    this.temps_entre_steps_del_descent = 0.005; // en segons
   }
 
   set_default_parameters() {
@@ -127,7 +127,6 @@ export class ExperimentFermat {
         (1 / num_transicions) * this.g_width,
         this.g_height,
       );
-      console.log(a, x, 0, (1 / num_transicions) * this.g_width, this.g_height);
       this.g.stroke();
     }
   }
@@ -170,7 +169,6 @@ export class ExperimentFermat {
         iterations += 1;
     }
     this.refresh_outputs();
-    this.redraw();
     console.log(this.media_change_verticals);
 
       // TODO: if compute_time is low enough, kill the setinterval
@@ -199,6 +197,13 @@ export class ExperimentFermat {
     time_report.innerHTML = this.compute_time().toString();
   }
 
+  randomitza_valors_existents()
+    {
+      console.log("Randomitzant");
+      this.ns                     = this.ns.map(_ => 1+Math.random());
+      this.media_change_verticals = this.media_change_verticals.map(_ => Math.random());
+      this.refresh_outputs();
+  }
   // Refresca indexs i heights
   refresh_inputs() {
     {
@@ -266,6 +271,7 @@ export class ExperimentFermat {
           });
       }
 
+      this.redraw();
   }
    
 }

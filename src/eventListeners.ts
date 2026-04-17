@@ -5,6 +5,7 @@ export function init_listeners(exp: ExperimentFermat) {
   const button_que_fa_stop = document.getElementById("stop_animation_button");
   const button_add_ns = document.getElementById("add_index_refrac");
   const button_rm_ns = document.getElementById("remove_index_refrac");
+  const button_randomize = document.getElementById("randomitza_valors_existents");
 
   button_que_fa_start?.addEventListener("click", () => {
     exp.start_descent();
@@ -53,5 +54,8 @@ export function init_listeners(exp: ExperimentFermat) {
       hs?.removeChild(hs.lastChild!);
     }
     exp.redraw();
+  });
+  button_randomize?.addEventListener("click", () => {
+    exp.randomitza_valors_existents();
   });
 }
