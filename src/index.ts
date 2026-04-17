@@ -199,6 +199,7 @@ export class ExperimentFermat {
   randomitza_valors_existents()
     {
       console.log("Randomitzant");
+      if (this.ns.length === 0) window.alert("Has d'afegir els botons, abans (amb 'Afegeix-ne')");
       this.ns                     = this.ns.map(_ => 1+Math.random());
       this.media_change_verticals = this.media_change_verticals.map(_ => Math.random());
       this.refresh_outputs();
