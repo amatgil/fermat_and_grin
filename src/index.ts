@@ -81,7 +81,16 @@ export class ExperimentFermat {
         this.media_change_verticals[i],
       );
 
-      let dist = Vec2.sub(meeting_point, prev_point).length();
+      // Diagrama en text perquè em fa pal anar a buscar paper
+      //   + <--- prev_point
+      //   |\
+      //   |a\ dist
+      //   |  \
+      //   +---+  <---- meeting_point
+      //     1
+      const a = Math.acos(Vec2.sub(meeting_point, prev_point).y);
+      const dist = 1 / Math.sin(a);
+
       let vel = 1 / this.ns[i];
       ret += dist / vel;
       prev_point = meeting_point;
@@ -136,10 +145,9 @@ export class ExperimentFermat {
     if (!(this.descent_timer_id === null)) {
       console.log("Ja estavem descendint");
     } else {
-      this.descent_timer_id = setInterval(
-        () => {this.step_descent()},
-        this.temps_entre_steps_del_descent * 1000,
-      );
+      this.descent_timer_id = setInterval(() => {
+        this.step_descent();
+      }, this.temps_entre_steps_del_descent * 1000);
     }
   }
 
@@ -147,30 +155,32 @@ export class ExperimentFermat {
     let keep_going = true;
     let iterations = 0;
     while (keep_going && iterations < 500) {
-        // Menys 1 per no permetre modificar la última (si no, passem a linia recta)
-        const index_to_tweak = Math.floor(Math.random() * (this.media_change_verticals.length-1));
+      // Menys 1 per no permetre modificar la última (si no, passem a linia recta)
+      const index_to_tweak = Math.floor(
+        Math.random() * (this.media_change_verticals.length - 1),
+      );
 
-        let delta = undefined;
-        if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
-        else                     delta =  DELTA_IN_STEPS;
+      let delta = undefined;
+      if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
+      else delta = DELTA_IN_STEPS;
 
-        const old_h = this.media_change_verticals[index_to_tweak];
-        const new_h = Math.max(0, Math.min(1, old_h + delta));
+      const old_h = this.media_change_verticals[index_to_tweak];
+      const new_h = Math.max(0, Math.min(1, old_h + delta));
 
-        const old_time = this.compute_time();
-        this.media_change_verticals[index_to_tweak] = new_h;
-        const new_time = this.compute_time();
+      const old_time = this.compute_time();
+      this.media_change_verticals[index_to_tweak] = new_h;
+      const new_time = this.compute_time();
 
-        if (new_time <= old_time) keep_going = false;
-        else this.media_change_verticals[index_to_tweak] = old_h;
+      if (new_time <= old_time) keep_going = false;
+      else this.media_change_verticals[index_to_tweak] = old_h;
 
-        iterations += 1;
+      iterations += 1;
     }
     this.refresh_outputs();
     if (iterations >= 500) {
-        // No hem fet progrès, cancelem
-        console.log("Parem de fer això")
-        this.stop_descent();
+      // No hem fet progrès, cancelem
+      console.log("Parem de fer això");
+      this.stop_descent();
     }
   }
 
@@ -196,13 +206,15 @@ export class ExperimentFermat {
     time_report.innerHTML = this.compute_time().toString();
   }
 
-  randomitza_valors_existents()
-    {
-      console.log("Randomitzant");
-      if (this.ns.length === 0) window.alert("Has d'afegir els botons, abans (amb 'Afegeix-ne')");
-      this.ns                     = this.ns.map(_ => 1+Math.random());
-      this.media_change_verticals = this.media_change_verticals.map(_ => Math.random());
-      this.refresh_outputs();
+  randomitza_valors_existents() {
+    console.log("Randomitzant");
+    if (this.ns.length === 0)
+      window.alert("Has d'afegir els botons, abans (amb 'Afegeix-ne')");
+    this.ns = this.ns.map((_) => 1 + Math.random());
+    this.media_change_verticals = this.media_change_verticals.map((_) =>
+      Math.random(),
+    );
+    this.refresh_outputs();
   }
   // Refresca indexs i heights
   refresh_inputs() {
@@ -239,41 +251,39 @@ export class ExperimentFermat {
       this.media_change_verticals = heights;
     }
   }
-  refresh_outputs()
+  refresh_outputs() {
     {
-      {
-          const nss = document.getElementById("input_ns");
-          if (nss?.childNodes === undefined) {
-              throw Error("Whoopsie");
-          }
-
-          nss.childNodes.forEach((child, i) => {
-              if (child instanceof HTMLInputElement) {
-                  child.value = this.ns[i].toString();
-              } else {
-                  throw Error("Unreachable");
-              }
-          });
+      const nss = document.getElementById("input_ns");
+      if (nss?.childNodes === undefined) {
+        throw Error("Whoopsie");
       }
 
-      {
-          const hs = document.getElementById("input_heights");
-          if (hs?.childNodes === undefined) {
-              throw Error("Whoopsie");
-          }
+      nss.childNodes.forEach((child, i) => {
+        if (child instanceof HTMLInputElement) {
+          child.value = this.ns[i].toString();
+        } else {
+          throw Error("Unreachable");
+        }
+      });
+    }
 
-          hs.childNodes.forEach((child, i) => {
-              if (child instanceof HTMLInputElement) {
-                  child.value = this.media_change_verticals[i].toString();
-              } else {
-                  throw Error("Unreachable");
-              }
-          });
+    {
+      const hs = document.getElementById("input_heights");
+      if (hs?.childNodes === undefined) {
+        throw Error("Whoopsie");
       }
 
-      this.redraw();
+      hs.childNodes.forEach((child, i) => {
+        if (child instanceof HTMLInputElement) {
+          child.value = this.media_change_verticals[i].toString();
+        } else {
+          throw Error("Unreachable");
+        }
+      });
+    }
+
+    this.redraw();
   }
-   
 }
 
 function start() {
