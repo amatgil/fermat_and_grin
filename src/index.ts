@@ -7,7 +7,8 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.01;
+const DELTA_IN_STEPS = 0.005;
+const TEMPS_ENTRE_STEPS = 10; // en millisegons
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
 export class ExperimentFermat {
@@ -19,7 +20,7 @@ export class ExperimentFermat {
   g_width: number;
   g_height: number;
   descent_timer_id: null | number;
-  temps_entre_steps_del_descent: number;
+  angles_pel_print: number[];
 
   // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
@@ -31,7 +32,7 @@ export class ExperimentFermat {
     this.g_width = width;
     this.g_height = height;
     this.descent_timer_id = null;
-    this.temps_entre_steps_del_descent = 0.005; // en segons
+    this.angles_pel_print = [];
   }
 
   set_default_parameters() {
@@ -67,6 +68,7 @@ export class ExperimentFermat {
   }
 
   compute_time(): number {
+    this.angles_pel_print = [];
     let ret: number = 0;
 
     const num_transicions = this.ns.length;
@@ -90,6 +92,7 @@ export class ExperimentFermat {
       //     1
       const a = Math.acos(Vec2.sub(meeting_point, prev_point).y);
       const dist = 1 / Math.sin(a);
+      this.angles_pel_print.push(a);
 
       let vel = 1 / this.ns[i];
       ret += dist / vel;
@@ -147,11 +150,12 @@ export class ExperimentFermat {
     } else {
       this.descent_timer_id = setInterval(() => {
         this.step_descent();
-      }, this.temps_entre_steps_del_descent * 1000);
+      }, TEMPS_ENTRE_STEPS);
     }
   }
 
   step_descent() {
+    console.log("ya");
     let keep_going = true;
     let iterations = 0;
     while (keep_going && iterations < 500) {
@@ -179,7 +183,7 @@ export class ExperimentFermat {
     this.refresh_outputs();
     if (iterations >= 500) {
       // No hem fet progrès, cancelem
-      console.log("Parem de fer això");
+      console.log("Hem fet massa iteracions sense progrès, parem");
       this.stop_descent();
     }
   }

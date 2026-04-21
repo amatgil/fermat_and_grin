@@ -5,7 +5,10 @@ export function init_listeners(exp: ExperimentFermat) {
   const button_que_fa_stop = document.getElementById("stop_animation_button");
   const button_add_ns = document.getElementById("add_index_refrac");
   const button_rm_ns = document.getElementById("remove_index_refrac");
-  const button_randomize = document.getElementById("randomitza_valors_existents");
+  const button_randomize = document.getElementById(
+    "randomitza_valors_existents",
+  );
+  const print_res = document.getElementById("imprimeix_resultat");
 
   button_que_fa_start?.addEventListener("click", () => {
     exp.start_descent();
@@ -57,5 +60,15 @@ export function init_listeners(exp: ExperimentFermat) {
   });
   button_randomize?.addEventListener("click", () => {
     exp.randomitza_valors_existents();
+  });
+
+  print_res?.addEventListener("click", () => {
+    console.log("<RESULTATS>");
+    console.log("Indexs: ", exp.ns);
+    console.log("Angles", exp.angles_pel_print);
+    console.log(
+      "Recorda que Snell prediu: n1*sin(tau/4 - a1) = n2*sin(tau/4 - a2)",
+    );
+    console.log("</RESULTATS>");
   });
 }
