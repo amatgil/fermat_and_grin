@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="icon" type="image/x-icon" href="fermat.jpg" />
+        <script src="dist/index.js" type="module"></script>
+        <title>Difraction is cool</title>
+        <style>
+            * {
+                margin: 10px;
+            }
+        </style>
+    </head>
+    <body onload="start()">
+        <canvas id="c" style="border: 2px solid #000000"></canvas>
+        <div style="border: 2px solid black; width: fit-content; padding: 5px">
+            <label>Temps</label>
+            <div><span id="time_taken">0</span><span>s</span></div>
+        </div>
+        <div style="border: 2px solid black; width: fit-content">
+            <label>Valors per secció</label>
+            <button id="add_index_refrac">Afegeix-ne un</button>
+            <button id="remove_index_refrac">Elimina'n un</button>
+            <button id="randomitza_valors_existents">
+                Randomitza els existents
+            </button>
+            <div>
+                <label>Indexs de refracció</label>
+                <div id="input_ns"></div>
+            </div>
+            <div>
+                <label>Punt de transició</label>
+                <div id="input_heights"></div>
+            </div>
+        </div>
+        <div style="border: 2px solid black; width: fit-content">
+            <label>Control descent</label>
+            <button id="start_animation_button">Inicia Descent</button>
+            <button id="stop_animation_button">Para Descent</button>
+            <button id="imprimeix_resultat">Imprimeix indexs i angles</button>
+        </div>
+    </body>
+</html>
