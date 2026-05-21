@@ -1,4 +1,4 @@
-import { ExperimentFermat } from "./index.js";
+import { ExperimentFermat } from "./fermat.js";
 const TAU = 6.28318530717958647692;
 
 export function init_listeners(exp: ExperimentFermat) {
