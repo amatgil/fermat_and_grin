@@ -20,8 +20,7 @@ export class ExperimentGrin {
 
   cable_length: number;
   ns: number[];
-
-
+  boundary_heights: number[];
 
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
     this.g = g;
@@ -34,10 +33,11 @@ export class ExperimentGrin {
     this.radi_fibra = 1; // Ni idea de quines unitats posar lmao
 
     this.angle_raig = degToRad(10); // En radians
-    this.height_raig = this.radi_fibra/2;
-    this.alpha = 1;
-    this.cable_length = 100; // En metres (suposo)
+    this.height_raig = 0;
+    this.alpha = 5;
+    this.cable_length = 300; // En metres (suposo)
     this.ns = [];
+    this.boundary_heights = [];
   }
 
   /**
@@ -72,21 +72,51 @@ export class ExperimentGrin {
 
   compute_ray_points() {
     
-    let initial_y = this.height_raig;
     let n0 = 1.0 // El raig comença a l'aire
     let n1 = this.ns[0];
     let theta_in = this.angle_raig;
     // Angle with respect to the horizontal
     let theta_out = this.compute_refracted_angle(n0, theta_in, n1); 
     
+    theta_in = Math.PI/2 - theta_out;
 
-    let current_region = 0;
-    let current_point = new Vec2(0, this.height_raig);
     let region_height = (2*this.num_regions-1)/(2*this.radi_fibra);
-    /*
+    
+    // Vector de punts per on passa el raig:
+    let points: Vec2[] = []
+    
+    // Direcció cap on va el raig:
+    //  - Cap a dalt: +1
+    //  - Cap a baix: -1
+    let sign = this.angle_raig/Math.abs(this.angle_raig);
+
+    let current_region = 0; // Crec que sempre ha de començar en mig
+    let current_point = new Vec2(0, this.height_raig);
+
     while (current_point.x < this.cable_length) {
-        // TODO!!!
-    }*/
+
+        // 1. Trobar l'angle de sortida:
+        if (Math.abs(current_region+sign) >= this.num_regions) {
+            // REFLEXIÓ TOTAL INTERNA
+            sign *= -1;
+            theta_out = theta_in;
+        }
+        else {
+            // REFRACCIÓ
+            let n1 = this.ns[Math.abs(current_region)];
+            let n2 = this.ns[Math.abs(current_region+sign)];
+            theta_out = this.compute_refracted_angle(n1, theta_in, n2);
+        }
+
+        // 2. Trobar els desplaçaments que pot fer en X i en Y fins entrar en una nova regió
+        let delta_x =  region_height*Math.tan(theta_out)
+        current_point.x += delta_x;
+        current_point.y += region_height*sign;
+        points.push(new Vec2(current_point.x, current_point.y));
+        
+        // 3. Passar a la següent regió
+        current_region += sign;
+    }
   }
 
 
@@ -107,6 +137,10 @@ function start() {
   const experiment = new ExperimentGrin(g, width, height);
   init_listeners(experiment);
 
+
+  experiment.compute_indices_of_refraction_array();
+  console.log(experiment.ns);
+  experiment.compute_ray_points();
   experiment.redraw();
 }
 
