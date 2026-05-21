@@ -1,4 +1,5 @@
 import { ExperimentFermat } from "./index.js";
+const TAU = 6.28318530717958647692;
 
 export function init_listeners(exp: ExperimentFermat) {
   const button_que_fa_start = document.getElementById("start_animation_button");
@@ -65,10 +66,11 @@ export function init_listeners(exp: ExperimentFermat) {
   print_res?.addEventListener("click", () => {
     console.log("<RESULTATS>");
     console.log("Indexs: ", exp.ns);
-    console.log("Angles", exp.angles_pel_print);
     console.log(
-      "Recorda que Snell prediu: n1*sin(tau/4 - a1) = n2*sin(tau/4 - a2)",
+      "Angles",
+      exp.angles_pel_print.map((a) => TAU / 4 - a),
     );
+    console.log("Recorda que Snell prediu: n1*sin(a) = n2*sin(b)");
     console.log("</RESULTATS>");
   });
 }
