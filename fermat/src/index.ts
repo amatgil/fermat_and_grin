@@ -143,8 +143,22 @@ export class ExperimentFermat {
     }
   }
 
+  set_compute_indicator() {
+    const canvas_elem = document.getElementById("c");
+    if (canvas_elem?.style != undefined) {
+      canvas_elem.style.border = "5px solid green";
+    }
+  }
+  unset_compute_indicator() {
+    const canvas_elem = document.getElementById("c");
+    if (canvas_elem?.style != undefined) {
+      canvas_elem.style.border = "5px solid black";
+    }
+  }
+
   start_descent() {
     console.log("Iniciant el descent");
+    this.set_compute_indicator();
     if (!(this.descent_timer_id === null)) {
       console.log("Ja estavem descendint");
     } else {
@@ -155,18 +169,15 @@ export class ExperimentFermat {
   }
 
   step_descent() {
-    console.log("ya");
     let keep_going = true;
     let iterations = 0;
     while (keep_going && iterations < 500) {
-      // Menys 1 per no permetre modificar la última (si no, passem a linia recta)
-      const index_to_tweak = Math.floor(
-        Math.random() * (this.media_change_verticals.length - 1),
-      );
+      // Més 1 per no permetre modificar la segona (si no, perdem l'angle)
+      const index_to_tweak =
+        1 +
+        Math.floor(Math.random() * (this.media_change_verticals.length - 1));
 
-      let delta = undefined;
-      if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
-      else delta = DELTA_IN_STEPS;
+      let delta = Math.random() < 0.5 ? -DELTA_IN_STEPS : DELTA_IN_STEPS;
 
       const old_h = this.media_change_verticals[index_to_tweak];
       const new_h = Math.max(0, Math.min(1, old_h + delta));
@@ -190,6 +201,7 @@ export class ExperimentFermat {
 
   stop_descent() {
     console.log("Parant el descent");
+    this.unset_compute_indicator();
     if (this.descent_timer_id === null) {
       console.log("No hi havia cap timer actiu");
     } else {
