@@ -84,18 +84,30 @@ export class ExperimentFermat {
       );
 
       // Diagrama en text perquè em fa pal anar a buscar paper
-      //   + <--- prev_point
-      //   |\
-      //   |a\ dist
-      //   |  \
-      //   +---+  <---- meeting_point
-      //     1
-      const a = Math.acos(Vec2.sub(meeting_point, prev_point).y);
-      const dist = 1 / Math.sin(a);
+      //    + <--- prev_point
+      //    | \
+      //    |   \ h
+      //   l|     \
+      //    |       \
+      //    |        a\
+      //    +----------+  <---- meeting_point
+      //        1
+      //         1
+      //    +----------+  <---- meeting_point
+      //    |        a/
+      //    |       /
+      //    |      /
+      //   l|    / h
+      //    |  /
+      //    +   <--- prev_point
+
+      const l = meeting_point.y - prev_point.y;
+      const a = Math.atan(l); // tan(a) = l/1 => a = atan(l)
+      const h = 1 / Math.cos(a); // cos(a) = 1/h => h = 1/cos(a)
       this.angles_pel_print.push(a);
 
       let vel = 1 / this.ns[i];
-      ret += dist / vel;
+      ret += h / vel;
       prev_point = meeting_point;
     }
 

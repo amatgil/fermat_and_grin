@@ -68,9 +68,18 @@ export function init_listeners(exp: ExperimentFermat) {
     console.log("Indexs: ", exp.ns);
     console.log(
       "Angles",
-      exp.angles_pel_print.map((a) => TAU / 4 - a),
+      exp.angles_pel_print.map((a) => (TAU / 4 - a).toFixed(2)),
     );
-    console.log("Recorda que Snell prediu: n1*sin(a) = n2*sin(b)");
+    let snell = [];
+    for (let i = 0; i < exp.angles_pel_print.length; ++i) {
+      const n1 = exp.ns[i];
+      const n2 = exp.ns[i + 1];
+      const a1 = exp.angles_pel_print[i];
+      const a2 = exp.angles_pel_print[i + 1];
+      snell.push(a2);
+    }
+
+    console.log("Snell haguès predit:", snell);
     console.log("</RESULTATS>");
   });
 }
