@@ -1,6 +1,6 @@
 import { init_listeners } from "./eventListeners.js";
 import { run_tests } from "./tests.js";
-import { ExperimentFermat } from "./fermat.js";
+import { energyData, ExperimentFermat } from "./fermat.js";
 
 function start() {
   const canvas = document.getElementById("c") as HTMLCanvasElement;
@@ -16,7 +16,9 @@ function start() {
   init_listeners(experiment);
 
   experiment.redraw();
-  run_tests();
+
+  (window as any).exp = experiment;
 }
 
 (window as any).start = start;
+(window as any).energyData = energyData;

@@ -69,7 +69,6 @@ export class ExperimentFermat {
     this.angles_pel_print = [];
     let ret: number = 0;
 
-    console.log(this);
     const num_transicions = this.ns.length;
     if (this.media_change_verticals.length != num_transicions) {
       throw Error("media change vertical no correspon amb ns");
@@ -183,21 +182,22 @@ export class ExperimentFermat {
     let keep_going = true;
     let iterations = 0;
     while (keep_going && iterations < 500) {
-      // Més 1 per no permetre modificar la segona (si no, perdem l'angle)
-      const index_to_tweak =
-        1 +
-        Math.floor(Math.random() * (this.media_change_verticals.length - 1));
+      // L'angle si que el podem modificar !!
+      // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
+      const index_to_tweak = Math.floor(
+        Math.random() * this.media_change_verticals.length,
+      );
 
-      let delta = Math.random() < 0.5 ? -DELTA_IN_STEPS : DELTA_IN_STEPS;
+      let delta = DELTA_IN_STEPS * (Math.random() < 0.5 ? 1 : -1);
 
       const old_h = this.media_change_verticals[index_to_tweak];
-      const new_h = Math.max(0, Math.min(1, old_h + delta));
+      const new_h = clamp(old_h + delta, 0, 1);
 
       const old_time = this.compute_time();
       this.media_change_verticals[index_to_tweak] = new_h;
       const new_time = this.compute_time();
 
-      if (new_time <= old_time) keep_going = false;
+      if (new_time < old_time) keep_going = false;
       else this.media_change_verticals[index_to_tweak] = old_h;
 
       iterations += 1;
@@ -311,4 +311,21 @@ export class ExperimentFermat {
 
     this.redraw();
   }
+}
+
+// For seeing what gradient descent is dealing with
+export function energyData(exp: ExperimentFermat, index: number): string {
+  const granularitat = 0.01;
+  let output: string = "";
+
+  for (let y = 0; y < 1; y += granularitat) {
+    exp.media_change_verticals[index] = y;
+    output += `${y},${exp.compute_time()}\n`;
+  }
+
+  return output;
+}
+
+function clamp(x: number, lower: number, upper: number): number {
+  return Math.min(Math.max(lower, x), upper);
 }
