@@ -7,7 +7,7 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.005;
+const DELTA_IN_STEPS = 0.045;
 const TEMPS_ENTRE_STEPS = 10; // en millisegons
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
@@ -90,12 +90,14 @@ export class ExperimentFermat {
       //   |  \
       //   +---+  <---- meeting_point
       //     1
-      const a = Math.acos(Vec2.sub(meeting_point, prev_point).y);
-      const dist = 1 / Math.sin(a);
+      const a = Math.atan((Vec2.sub(meeting_point, prev_point).y));
+      const dist = 1 / Math.cos(a);
       this.angles_pel_print.push(a);
-
+      
       let vel = 1 / this.ns[i];
+      
       ret += dist / vel;
+      //console.log("Distancia ", i, " es ", dist, " angulo ", a, "tiempo ", ret);
       prev_point = meeting_point;
     }
 
@@ -163,10 +165,12 @@ export class ExperimentFermat {
       const index_to_tweak = Math.floor(
         Math.random() * (this.media_change_verticals.length - 1),
       );
-
-      let delta = undefined;
-      if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
-      else delta = DELTA_IN_STEPS;
+      
+      let delta = Math.random()*DELTA_IN_STEPS;
+      if (Math.random() < 0.5) delta = delta * -1;
+      //let delta = undefined;
+      //if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
+      //else delta = DELTA_IN_STEPS;
 
       const old_h = this.media_change_verticals[index_to_tweak];
       const new_h = Math.max(0, Math.min(1, old_h + delta));
@@ -174,7 +178,7 @@ export class ExperimentFermat {
       const old_time = this.compute_time();
       this.media_change_verticals[index_to_tweak] = new_h;
       const new_time = this.compute_time();
-
+      //console.log("new : ", new_time, " old ", old_time);
       if (new_time <= old_time) keep_going = false;
       else this.media_change_verticals[index_to_tweak] = old_h;
 

@@ -66,6 +66,12 @@ export function init_listeners(exp: ExperimentFermat) {
     console.log("<RESULTATS>");
     console.log("Indexs: ", exp.ns);
     console.log("Angles", exp.angles_pel_print);
+    const vueltas = exp.ns.length;
+    for (let i = 0; i < (vueltas - 1); ++i) {
+        const a = exp.ns[i] * Math.sin(exp.angles_pel_print[i]); 
+        const b = exp.ns[i+1] * Math.sin(exp.angles_pel_print[i+1]);
+        console.log("Result snel ", a, " ", b);
+    }
     console.log(
       "Recorda que Snell prediu: n1*sin(tau/4 - a1) = n2*sin(tau/4 - a2)",
     );
