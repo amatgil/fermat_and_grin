@@ -1,15 +1,6 @@
 import { init_listeners } from "./eventListeners.js";
 import { energyData, ExperimentFermat } from "./fermat.js";
 
-const REAL_WIDTH: number = 10;
-const REAL_HEIGHT: number = 5;
-
-const TAU = 6.28318530717958647692;
-const PI = TAU / 2;
-
-const DELTA_IN_STEPS = 0.045;
-const TEMPS_ENTRE_STEPS = 10; // en millisegons
-
 function start() {
   const canvas = document.getElementById("c") as HTMLCanvasElement;
 

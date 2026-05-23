@@ -199,7 +199,8 @@ export class ExperimentFermat {
         Math.random() * (this.media_change_verticals.length - 1),
       );
 
-      let delta = DELTA_IN_STEPS * (Math.random() < 0.5 ? 1 : -1);
+      let delta = Math.random() * DELTA_IN_STEPS;
+      if (Math.random() < 0.5) delta = delta * -1;
 
       const old_h = this.media_change_verticals[index_to_tweak];
       const new_h = clamp(old_h + delta, 0, 1);
