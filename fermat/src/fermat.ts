@@ -38,6 +38,21 @@ export class ExperimentFermat {
   set_default_parameters() {
     // TODO
   }
+
+  compute_snell_distances(): number[] {
+    let snell: number[] = [];
+    this.what_snell_predicts().forEach((e) => snell.push(e.y));
+    let ray   = [0.5].concat(this.media_change_verticals); 
+    console.log(snell.length, " -> ", snell);
+    console.log(ray.length, " -> ", ray);
+    let res:number[] = [];
+    for (let i in ray) {
+      res.push((ray[i] - snell[i])*(ray[i] - snell[i]));
+    }
+    console.log(res)
+    return res;
+  }
+
   overlay_snell() {
     this.g.strokeStyle = "green";
     let arrx: number[] =[]; 
@@ -193,6 +208,7 @@ export class ExperimentFermat {
       canvas_elem.style.border = "5px solid green";
     }
   }
+
   unset_compute_indicator() {
     const canvas_elem = document.getElementById("c");
     if (canvas_elem?.style != undefined) {
@@ -215,7 +231,7 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    const max_iterations_allowed = iterations < 20000 * this.ns.length;
+    const max_iterations_allowed = iterations < 2000000 * this.ns.length;
     while (keep_going && max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
@@ -359,6 +375,7 @@ export class ExperimentFermat {
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
     time_report.innerHTML = this.compute_time().toString();
+    this.compute_snell_distances();
   }
 
   randomitza_valors_existents() {
