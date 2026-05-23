@@ -192,7 +192,8 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    while (keep_going && iterations < 500) {
+    const max_iterations_allowed = iterations < 2000 * this.ns.length;
+    while (keep_going && max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
       const index_to_tweak = Math.floor(
