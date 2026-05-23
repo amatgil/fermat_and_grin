@@ -78,6 +78,7 @@ export class ExperimentFermat {
 
     let prev_point = this.ray_start;
     for (let i = 0; i < num_transicions; ++i) {
+      //console.log("PRINT ", this.media_change_verticals[i]);
       let meeting_point = new Vec2(
         (i + 1) / num_transicions,
         this.media_change_verticals[i],
@@ -160,7 +161,7 @@ export class ExperimentFermat {
     console.log("ya");
     let keep_going = true;
     let iterations = 0;
-    while (keep_going && iterations < 500) {
+    while (keep_going && iterations < 1500) {
       // Menys 1 per no permetre modificar la última (si no, passem a linia recta)
       const index_to_tweak = Math.floor(
         Math.random() * (this.media_change_verticals.length - 1),
@@ -168,9 +169,6 @@ export class ExperimentFermat {
       
       let delta = Math.random()*DELTA_IN_STEPS;
       if (Math.random() < 0.5) delta = delta * -1;
-      //let delta = undefined;
-      //if (Math.random() < 0.5) delta = -DELTA_IN_STEPS;
-      //else delta = DELTA_IN_STEPS;
 
       const old_h = this.media_change_verticals[index_to_tweak];
       const new_h = Math.max(0, Math.min(1, old_h + delta));
@@ -178,8 +176,9 @@ export class ExperimentFermat {
       const old_time = this.compute_time();
       this.media_change_verticals[index_to_tweak] = new_h;
       const new_time = this.compute_time();
-      //console.log("new : ", new_time, " old ", old_time);
-      if (new_time <= old_time) keep_going = false;
+      if (new_time < old_time) {
+        keep_going = false; 
+      }
       else this.media_change_verticals[index_to_tweak] = old_h;
 
       iterations += 1;
@@ -204,6 +203,17 @@ export class ExperimentFermat {
 
   redraw() {
     this.refresh_inputs();
+    this.g.clearRect(0, 0, this.g_width, this.g_height);
+    this.draw_media_backgrounds();
+    this.draw_ray();
+    this.draw_media_transitions();
+    const time_report = document.getElementById("time_taken");
+    if (time_report === null) throw Error("algú ha borrat lo del temps");
+
+    time_report.innerHTML = this.compute_time().toString();
+  }
+
+  redraw_special() {
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
     this.draw_ray();
@@ -290,7 +300,7 @@ export class ExperimentFermat {
       });
     }
 
-    this.redraw();
+    this.redraw_special();
   }
 }
 
