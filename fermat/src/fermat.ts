@@ -231,12 +231,13 @@ export class ExperimentFermat {
       throw Error("media change vertical no correspon amb ns");
     }
 
+    // n1*sin(a1) = n2*sin(a2)
     ret.push(this.ray_start);
-    for (let i = 1; i < num_transicions; ++i) {
-      let meeting_point = new Vec2(
-        (i + 1) / num_transicions,
-        this.ns[i] / this.ns[i - 1],
-      );
+    for (let i = 0; i < num_transicions - 1; ++i) {
+      const n1 = this.ns[i];
+      const n2 = this.ns[i + 1];
+
+      let meeting_point = new Vec2((i + 1) / num_transicions, n2 / n1);
       ret.push(meeting_point);
     }
 
