@@ -5,7 +5,7 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.005;
+const DELTA_IN_STEPS = 0.025;
 const TEMPS_ENTRE_STEPS = 10; // en millisegons
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
@@ -185,7 +185,7 @@ export class ExperimentFermat {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
       const index_to_tweak = Math.floor(
-        Math.random() * this.media_change_verticals.length,
+        Math.random() * (this.media_change_verticals.length - 1),
       );
 
       let delta = DELTA_IN_STEPS * (Math.random() < 0.5 ? 1 : -1);
