@@ -51,12 +51,6 @@ export class ExperimentGrin {
     /**
      * Computes the index of refraction in a GRIN fiber optic cable using the following formula:
      * n(r) = n1 · sqrt(1 - 2·delta·(r/a)^alpha)
-     * @param num_divisions 
-     * @param delta 
-     * @param n1 
-     * @param alpha 
-     * @param amplada 
-     * @param r 
      */
     static compute_index_of_refraction(num_divisions: number, delta: number, n1: number, alpha: number, total_radius: number, r: number): number {
         let inside_sqrt = 1 - 2*delta*Math.pow(r/total_radius, alpha);
@@ -192,8 +186,8 @@ export class ExperimentGrin {
         let region_height_pixels = this.g_height*region_height/(2*this.radi_fibra);
         for (let i = 0; i < this.num_regions; ++i) {
             let j = this.num_regions-i-1;
-            let blue = 255*((this.n1 - this.ns[(this.num_regions - 1)-i]) / (this.n1 * this.delta));
-            this.g.fillStyle = `rgb(0, 0, ${blue})`
+            let blue = 200*((this.n1 - this.ns[(this.num_regions - 1)-i]) / (this.n1 * this.delta));
+            this.g.fillStyle = `rgb(0, ${blue}, ${blue})`
             let rect_height = region_height_pixels + region_height_pixels*2*j; 
             let bottom_y = this.g_height/2- rect_height/2;
             this.g.fillRect(PADDING_LEFT, bottom_y, this.g_width, rect_height);
@@ -246,7 +240,7 @@ function start() {
 const canvas = document.getElementById("c") as HTMLCanvasElement;
 
 const width = window.innerWidth * 0.9;
-const height = window.innerHeight * 0.7;
+const height = window.innerHeight * 0.4;
 
 canvas.width = width;
 canvas.height = height;
