@@ -125,6 +125,8 @@ export class ExperimentFermat {
 
   draw_ray() {
     this.g.strokeStyle = "red";
+    this.g.lineWidth = 1;
+
     let punts = this.compute_ray(this.media_change_verticals);
     this.g.beginPath();
     this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
@@ -137,6 +139,7 @@ export class ExperimentFermat {
   draw_media_transitions() {
     const num_transicions = this.ns.length;
     this.g.strokeStyle = "blue";
+    this.g.lineWidth = 1;
     for (let i = 0; i < num_transicions; ++i) {
       let x = ((i + 1) / num_transicions) * this.g_width;
       let y = this.g_height;
@@ -256,6 +259,7 @@ export class ExperimentFermat {
   }
   draw_what_snell_predicts() {
     this.g.strokeStyle = "green";
+    this.g.lineWidth = 5;
 
     let punts = this.what_snell_predicts();
 
@@ -271,9 +275,11 @@ export class ExperimentFermat {
     if (this.descent_timer_id === null) this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
-    this.draw_ray();
-    this.draw_media_transitions();
+
     if (this.are_we_showing_snell) this.draw_what_snell_predicts();
+    this.draw_ray();
+
+    this.draw_media_transitions();
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
