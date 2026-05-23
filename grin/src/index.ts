@@ -5,6 +5,9 @@ function degToRad(deg: number): number {
 return (deg/360)*2*Math.PI;
 }
 
+const PADDING = 100;
+let PADDING_LEFT = PADDING;
+
 export class ExperimentGrin {
     g: CanvasRenderingContext2D;
     g_width: number;
@@ -15,6 +18,7 @@ export class ExperimentGrin {
 
     radi_fibra: number;
     region_height: number;
+    aspect_ratio: number;
 
     angle_raig: number;
     height_raig: number;
@@ -31,14 +35,15 @@ export class ExperimentGrin {
 
     this.n1 = 1.47;
     this.delta = 0.01;
-    this.num_regions = 5;
+    this.num_regions = 40;
     this.radi_fibra = 1; // Ni idea de quines unitats posar lmao
     this.region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
+    this.aspect_ratio = 1; // Width / Height
 
     this.angle_raig = degToRad(10); // En radians
     this.height_raig = 0;
     this.alpha = 2;
-    this.cable_length = 100; // En metres (suposo)
+    this.cable_length = 2*this.radi_fibra*this.aspect_ratio; // En metres (suposo)
     this.ns = [];
     this.ray_points = []
     }
@@ -54,40 +59,40 @@ export class ExperimentGrin {
      * @param r 
      */
     static compute_index_of_refraction(num_divisions: number, delta: number, n1: number, alpha: number, total_radius: number, r: number): number {
-    let inside_sqrt = 1 - 2*delta*Math.pow(r/total_radius, alpha);
-    let res = n1*Math.sqrt(inside_sqrt); 
-    if (isNaN(res)) throw Error("Sqrt gave NAN:" + 
-        ", " + "num_divisions " + num_divisions + 
-        ", " + "delta " + delta + 
-        ", " + "n1 " + n1 + 
-        ", " + "alpha " + alpha + 
-        ", " + "total_radius " + total_radius + 
-        ", " + "r " + r) 
-    return res; 
+        let inside_sqrt = 1 - 2*delta*Math.pow(r/total_radius, alpha);
+        let res = n1*Math.sqrt(inside_sqrt); 
+        if (isNaN(res)) throw Error("Sqrt gave NAN:" + 
+            ", " + "num_divisions " + num_divisions + 
+            ", " + "delta " + delta + 
+            ", " + "n1 " + n1 + 
+            ", " + "alpha " + alpha + 
+            ", " + "total_radius " + total_radius + 
+            ", " + "r " + r) 
+        return res; 
     }
 
     compute_indices_of_refraction_array() {
-    this.ns = [];
-    let region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
-    for (let i = 0; i < this.num_regions; ++i) {
-        //let r = this.radi_fibra*(i/this.num_regions);
-        let r = i*region_height;
-        let n = ExperimentGrin.compute_index_of_refraction(this.num_regions, this.delta, this.n1, this.alpha, this.radi_fibra, r);
-        this.ns.push(n);
-    }
+        this.ns = [];
+        this.region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
+        for (let i = 0; i < this.num_regions; ++i) {
+            //let r = this.radi_fibra*(i/this.num_regions);
+            let r = i*this.region_height;
+            let n = ExperimentGrin.compute_index_of_refraction(this.num_regions, this.delta, this.n1, this.alpha, this.radi_fibra, r);
+            this.ns.push(n);
+        }
     }
 
     // Aplies snell's law to compute the refracted angle
     compute_refracted_angle(n1: number, theta_in: number, n2:number): number {
-    let sintheta = n1*Math.sin(theta_in)/n2;
-    let res = Math.asin(sintheta);
-    if (isNaN(res)) console.log("NAN! n1=" + n1 + ", theta_in=" + theta_in + ", n2=" + n2 + ", sintheta=" + sintheta);
-    return res;
+        let sintheta = n1*Math.sin(theta_in)/n2;
+        let res = Math.asin(sintheta);
+        if (isNaN(res)) console.log("NAN! n1=" + n1 + ", theta_in=" + theta_in + ", n2=" + n2 + ", sintheta=" + sintheta);
+        return res;
     }
 
     advance_ray_to_next_doundary(current_region: number, direction: number, theta_in: number) {
         if (Math.abs(current_region+direction) >= this.num_regions) {
-            throw Error("El raig ha sortit del material! " + current_region);
+            //throw Error("El raig ha sortit del material! " + current_region);
         }
 
         let theta_out;
@@ -108,8 +113,6 @@ export class ExperimentGrin {
             current_region += direction;
         }
 
-        console.log( "current region:", current_region, `${current_region} -> ${current_region+direction}`, "(" + n1 + ", " + n2 + ")");
-        console.log( "\t", `(${Math.floor(100*360*theta_in/(2*Math.PI))/100}, ${Math.floor(100*360*theta_out/(2*Math.PI))/100})`);
 
         // 2. Trobar els desplaçaments que pot fer en X i en Y fins entrar en una nova regió
         let delta_x = this.region_height*Math.tan(theta_out);
@@ -128,6 +131,7 @@ export class ExperimentGrin {
 
     compute_ray_points() {
 
+        this.ray_points = [];
         let n0 = 1.0 // El raig comença a l'aire
         let n1 = this.ns[0];
 
@@ -147,7 +151,7 @@ export class ExperimentGrin {
             this.region_height*Math.tan(theta_in)/2, 
             this.region_height*direction/2
         );
-
+        this.ray_points.push(new Vec2(0, 0));
         this.ray_points.push(current_point);
 
         while (current_point.x < this.cable_length) {
@@ -156,10 +160,23 @@ export class ExperimentGrin {
         }
     }
 
+
+    redraw() {
+        this.compute_indices_of_refraction_array();
+        this.g.fillStyle = "white";
+        this.g.fillRect(0,0, this.g_width, this.g_height);
+        this.draw_media_backgrounds();
+        this.g.strokeStyle = "red"
+        this.g.lineWidth = 4;
+        this.draw_ray();
+    }
+
     draw_ray() {
-        let [x_prev, y_prev] = [0, this.g_height/2];
+        this.compute_ray_points();
+
+        let [x_prev, y_prev] = [0, this.g_height/2 + PADDING_LEFT*Math.tan(this.angle_raig)];
         for (let p of this.ray_points) {
-            let x = (p.x/this.cable_length)*this.g_width;
+            let x = PADDING_LEFT+(p.x/this.cable_length)*(this.g_width-PADDING_LEFT);
             let y = (-p.y+this.radi_fibra)/(2*this.radi_fibra)*this.g_height;
             this.g.beginPath();
             this.g.moveTo(x_prev, y_prev);
@@ -169,22 +186,17 @@ export class ExperimentGrin {
         }
     }
 
-    redraw() {
-        this.draw_media_backgrounds();
-        this.g.strokeStyle = "red"
-        this.g.lineWidth = 4;
-        this.draw_ray();
-    }
+
     draw_media_backgrounds() {
         const num_transicions = this.ns.length;
         for (let i = 0; i < num_transicions - 1; ++i) {
             let x = (i /((num_transicions * 2) - 1)) * this.g_height;
-            let a = ((this.n1 - this.ns[(num_transicions - 1)-i]) / (this.n1 * this.delta)); // perquè els limits son 1 i 2
-            this.g.fillStyle =`rgba(0, 0, 240, ${a})`;
+            let a = ((this.n1 - this.ns[(num_transicions - 1)-i]) / (this.n1 * this.delta)); 
+            this.g.fillStyle =`rgba(30, 30, 30, ${1-a})`;
 
             this.g.beginPath();
             this.g.fillRect(
-                0,
+                PADDING_LEFT,
                 x,
                 this.g_width,
                 (1 / ((num_transicions * 2) - 1)) * this.g_height,
@@ -194,18 +206,24 @@ export class ExperimentGrin {
 
         for (let i = 0; i < num_transicions; ++i) {
             let x = ((i+num_transicions - 1) /((num_transicions * 2) - 1)) * this.g_height;
-            let a = (this.n1 - this.ns[i]) / (this.n1 * this.delta); // perquè els limits son 1 i 2
-            this.g.fillStyle =`rgba(0, 0, 240, ${a})`;
+            let a = (this.n1 - this.ns[i]) / (this.n1 * this.delta);
+            this.g.fillStyle =`rgba(30, 30, 30, ${1-a})`;
 
             this.g.beginPath();
             this.g.fillRect(
-                0,
+                PADDING_LEFT,
                 x,
                 this.g_width,
                 (1 / ((num_transicions * 2) - 1)) * this.g_height,
             );
             this.g.stroke();
         }
+    }
+
+    setAspectRatio(aspect_ratio: number) {
+        this.aspect_ratio = aspect_ratio;
+        this.cable_length = aspect_ratio*2*this.radi_fibra;
+        PADDING_LEFT = PADDING/aspect_ratio;
     }
 }
 
