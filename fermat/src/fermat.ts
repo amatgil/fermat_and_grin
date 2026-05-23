@@ -235,9 +235,10 @@ export class ExperimentFermat {
     while (keep_going && max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
-      const index_to_tweak = Math.floor(
-        Math.random() * (this.media_change_verticals.length - 1),
-      );
+      //   const index_to_tweak = Math.floor(
+      //     Math.random() * (this.media_change_verticals.length - 1),
+      //   );
+      const index_to_tweak = weighted_index(this.compute_snell_distances());
 
       let delta = Math.random() * DELTA_IN_STEPS;
       if (Math.random() < 0.5) delta = delta * -1;
