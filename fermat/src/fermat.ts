@@ -5,7 +5,7 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.005;
+const DELTA_IN_STEPS = 0.045;
 const TEMPS_ENTRE_STEPS = 10; // en millisegons
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
@@ -19,6 +19,7 @@ export class ExperimentFermat {
   g_height: number;
   descent_timer_id: null | number;
   angles_pel_print: number[];
+  are_we_showing_snell: boolean;
 
   // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
@@ -31,6 +32,7 @@ export class ExperimentFermat {
     this.g_height = height;
     this.descent_timer_id = null;
     this.angles_pel_print = [];
+    this.are_we_showing_snell = true;
   }
 
   set_default_parameters() {
@@ -99,13 +101,22 @@ export class ExperimentFermat {
       //    |  /
       //    +   <--- prev_point
 
-      const l = meeting_point.y - prev_point.y;
-      const a = Math.atan(l); // tan(a) = l/1 => a = atan(l)
-      const h = 1 / Math.cos(a); // cos(a) = 1/h => h = 1/cos(a)
+      // const l = meeting_point.y - prev_point.y;
+      // const a = Math.atan(l); // tan(a) = l/1 => a = atan(l)
+      // const h = 1 / Math.cos(a); // cos(a) = 1/h => h = 1/cos(a)
+      //this.angles_pel_print.push(a);
+
+      //let vel = 1 / this.ns[i];
+      //ret += h / vel;
+      //prev_point = meeting_point;
+
+      const a = Math.atan(Vec2.sub(meeting_point, prev_point).y);
+      const dist = 1 / Math.cos(a);
       this.angles_pel_print.push(a);
 
       let vel = 1 / this.ns[i];
-      ret += h / vel;
+
+      ret += dist / vel;
       prev_point = meeting_point;
     }
 
@@ -181,14 +192,16 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    while (keep_going && iterations < 500) {
+    const max_iterations_allowed = iterations < 2000 * this.ns.length;
+    while (keep_going && max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
       const index_to_tweak = Math.floor(
-        Math.random() * this.media_change_verticals.length,
+        Math.random() * (this.media_change_verticals.length - 1),
       );
 
-      let delta = DELTA_IN_STEPS * (Math.random() < 0.5 ? 1 : -1);
+      let delta = Math.random() * DELTA_IN_STEPS;
+      if (Math.random() < 0.5) delta = delta * -1;
 
       const old_h = this.media_change_verticals[index_to_tweak];
       const new_h = clamp(old_h + delta, 0, 1);
@@ -221,12 +234,46 @@ export class ExperimentFermat {
     }
   }
 
+  what_snell_predicts(): Vec2[] {
+    let ret: Vec2[] = [];
+
+    const num_transicions = this.ns.length;
+    if (this.media_change_verticals.length != num_transicions) {
+      throw Error("media change vertical no correspon amb ns");
+    }
+
+    // n1*sin(a1) = n2*sin(a2)
+    ret.push(this.ray_start);
+    for (let i = 0; i < num_transicions - 1; ++i) {
+      const n1 = this.ns[i];
+      const n2 = this.ns[i + 1];
+
+      let meeting_point = new Vec2((i + 1) / num_transicions, n2 / n1);
+      ret.push(meeting_point);
+    }
+
+    return ret;
+  }
+  draw_what_snell_predicts() {
+    this.g.strokeStyle = "green";
+
+    let punts = this.what_snell_predicts();
+
+    this.g.beginPath();
+    this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
+    for (let p of punts.slice(1)) {
+      this.g.lineTo(p.x * this.g_width, p.y * this.g_height);
+    }
+    this.g.stroke();
+  }
+
   redraw() {
-    this.refresh_inputs();
+    if (this.descent_timer_id === null) this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
     this.draw_ray();
     this.draw_media_transitions();
+    if (this.are_we_showing_snell) this.draw_what_snell_predicts();
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 

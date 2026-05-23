@@ -1,5 +1,4 @@
 import { init_listeners } from "./eventListeners.js";
-import { run_tests } from "./tests.js";
 import { energyData, ExperimentFermat } from "./fermat.js";
 
 function start() {
