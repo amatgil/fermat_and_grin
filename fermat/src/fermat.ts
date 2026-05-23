@@ -39,7 +39,25 @@ export class ExperimentFermat {
     // TODO
   }
   overlay_snell() {
-    // TODO
+    this.g.strokeStyle = "green";
+    let arrx: number[] =[]; 
+    let arry: number[] =[]; 
+    let punts = this.what_snell_predicts();
+    punts.forEach((element) => {arrx.push(element.x as number);
+                                arry.push(element.y as number);
+    });
+
+    console.log(`X: ${arrx}`);
+    console.log(`Y: ${arry}`);
+    this.g.beginPath();
+
+
+    const N = this.ns.length;
+    this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
+    for (let p of punts) {
+      this.g.lineTo(p.x * this.g_width, p.y * this.g_height);
+    }
+    this.g.stroke();
   }
 
   // Retorna el path que seguirà segons tots els rays
@@ -136,7 +154,9 @@ export class ExperimentFermat {
 
   draw_media_transitions() {
     const num_transicions = this.ns.length;
-    this.g.strokeStyle = "blue";
+    this.g.strokeStyle = "white";
+    const aux = this.g.lineWidth;
+    this.g.lineWidth = 1;
     for (let i = 0; i < num_transicions; ++i) {
       let x = ((i + 1) / num_transicions) * this.g_width;
       let y = this.g_height;
@@ -145,6 +165,7 @@ export class ExperimentFermat {
       this.g.lineTo(x, y);
       this.g.stroke();
     }
+    this.g.lineWidth = aux;
   }
 
   draw_media_backgrounds() {
@@ -192,7 +213,7 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    const max_iterations_allowed = iterations < 2000 * this.ns.length;
+    const max_iterations_allowed = iterations < 20000 * this.ns.length;
     while (keep_going && max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
@@ -234,6 +255,50 @@ export class ExperimentFermat {
     }
   }
 
+
+  static refractedHeight_with_newton(
+    A: number,
+    B: number,
+    n1: number,
+    n2: number,
+    tolerance = 1e-4,
+    maxIterations = 50
+  ): number {
+    // First choice:
+    let y = (A + B) / 2;
+
+    for (let i = 0; i < maxIterations; i++) {
+      const L1 = A - y;
+      const L2 = y - B;
+
+      // f(y)
+      const f =
+        n1 * L1 / Math.sqrt(1 + L1 * L1) -
+        n2 * L2 / Math.sqrt(1 + L2 * L2);
+
+      // f'(y) [Trobada utilitzant matlab jajajaja]
+      const fp = 
+          + (n1*(A - y)*(2*A - 2*y))/(2*Math.pow((A - y)*(A - y) + 1, 3/2)) 
+          - n2/Math.sqrt((B - y)*(B - y) + 1) 
+          - n1/Math.sqrt((A - y)*(A - y) + 1) 
+          + (n2*(B - y)*(2*B - 2*y))/(2*Math.pow((B - y)*(B - y) + 1, 3/2))
+
+
+      const yNext = y - f / fp;
+
+      // Has it converged?
+      if (Math.abs(yNext - y) < tolerance) {
+        return yNext;
+      }
+
+      y = yNext;
+    }
+
+    throw new Error(
+      "didn't converge"
+    );
+  }
+
   what_snell_predicts(): Vec2[] {
     let ret: Vec2[] = [];
 
@@ -244,14 +309,24 @@ export class ExperimentFermat {
 
     // n1*sin(a1) = n2*sin(a2)
     ret.push(this.ray_start);
-    for (let i = 0; i < num_transicions - 1; ++i) {
-      const n1 = this.ns[i];
-      const n2 = this.ns[i + 1];
+    let heights = [0.5].concat(this.media_change_verticals);
+    const N = heights.length;
+    for (let i = 1; i < N-1; ++i) {
+      const n1: number = this.ns[i-1];
+      const n2: number = this.ns[i];
 
-      let meeting_point = new Vec2((i + 1) / num_transicions, n2 / n1);
+      const A = heights[i-1];
+      const B = heights[i+1];
+
+      //console.log(A, B, n1, n2)
+      console.log("num transicions:", num_transicions);
+      let h = ExperimentFermat.refractedHeight_with_newton(A,B,n1,n2);
+      let meeting_point = new Vec2(
+        (i) / (num_transicions), 
+        h);
       ret.push(meeting_point);
     }
-
+    ret.push(new Vec2(1, heights[N-1]))
     return ret;
   }
   draw_what_snell_predicts() {
@@ -268,12 +343,13 @@ export class ExperimentFermat {
   }
 
   redraw() {
+    this.g.lineWidth = 3;
     if (this.descent_timer_id === null) this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
-    this.draw_ray();
     this.draw_media_transitions();
-    if (this.are_we_showing_snell) this.draw_what_snell_predicts();
+    if (this.are_we_showing_snell) this.overlay_snell();
+    this.draw_ray();
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
