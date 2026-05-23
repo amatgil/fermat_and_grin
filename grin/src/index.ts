@@ -86,7 +86,7 @@ export class ExperimentGrin {
     compute_refracted_angle(n1: number, theta_in: number, n2:number): number {
         let sintheta = n1*Math.sin(theta_in)/n2;
         let res = Math.asin(sintheta);
-        if (isNaN(res)) console.log("NAN! n1=" + n1 + ", theta_in=" + theta_in + ", n2=" + n2 + ", sintheta=" + sintheta);
+        //if (isNaN(res)) console.log("NAN! n1=" + n1 + ", theta_in=" + theta_in + ", n2=" + n2 + ", sintheta=" + sintheta);
         return res;
     }
 
@@ -165,7 +165,7 @@ export class ExperimentGrin {
         this.compute_indices_of_refraction_array();
         this.g.fillStyle = "white";
         this.g.fillRect(0,0, this.g_width, this.g_height);
-        this.draw_media_backgrounds();
+        this.draw_background();
         this.g.strokeStyle = "red"
         this.g.lineWidth = 4;
         this.draw_ray();
@@ -187,7 +187,20 @@ export class ExperimentGrin {
     }
 
 
-    draw_media_backgrounds() {
+    draw_background() {
+        let region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
+        let region_height_pixels = this.g_height*region_height/(2*this.radi_fibra);
+        for (let i = 0; i < this.num_regions; ++i) {
+            let j = this.num_regions-i-1;
+            let blue = 255*((this.n1 - this.ns[(this.num_regions - 1)-i]) / (this.n1 * this.delta));
+            this.g.fillStyle = `rgb(0, 0, ${blue})`
+            let rect_height = region_height_pixels + region_height_pixels*2*j; 
+            let bottom_y = this.g_height/2- rect_height/2;
+            this.g.fillRect(PADDING_LEFT, bottom_y, this.g_width, rect_height);
+        }
+    }
+
+    /*draw_media_backgrounds() {
         const num_transicions = this.ns.length;
         for (let i = 0; i < num_transicions - 1; ++i) {
             let x = (i /((num_transicions * 2) - 1)) * this.g_height;
@@ -218,7 +231,7 @@ export class ExperimentGrin {
             );
             this.g.stroke();
         }
-    }
+    }*/
 
     setAspectRatio(aspect_ratio: number) {
         this.aspect_ratio = aspect_ratio;
