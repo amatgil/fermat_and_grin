@@ -50,6 +50,7 @@ export class ExperimentFermat {
       res.push((ray[i] - snell[i])*(ray[i] - snell[i]));
     }
     console.log(res)
+    res.pop()
     return res;
   }
 
