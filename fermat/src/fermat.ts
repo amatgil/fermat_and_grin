@@ -19,6 +19,7 @@ export class ExperimentFermat {
   g_height: number;
   descent_timer_id: null | number;
   angles_pel_print: number[];
+  are_we_showing_snell: boolean;
 
   // Assigno els valors que serien per defecte
   constructor(g: CanvasRenderingContext2D, width: number, height: number) {
@@ -31,6 +32,7 @@ export class ExperimentFermat {
     this.g_height = height;
     this.descent_timer_id = null;
     this.angles_pel_print = [];
+    this.are_we_showing_snell = true;
   }
 
   set_default_parameters() {
@@ -221,12 +223,45 @@ export class ExperimentFermat {
     }
   }
 
+  what_snell_predicts(): Vec2[] {
+    let ret: Vec2[] = [];
+
+    const num_transicions = this.ns.length;
+    if (this.media_change_verticals.length != num_transicions) {
+      throw Error("media change vertical no correspon amb ns");
+    }
+
+    ret.push(this.ray_start);
+    for (let i = 1; i < num_transicions; ++i) {
+      let meeting_point = new Vec2(
+        (i + 1) / num_transicions,
+        this.ns[i] / this.ns[i - 1],
+      );
+      ret.push(meeting_point);
+    }
+
+    return ret;
+  }
+  draw_what_snell_predicts() {
+    this.g.strokeStyle = "green";
+
+    let punts = this.what_snell_predicts();
+
+    this.g.beginPath();
+    this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
+    for (let p of punts.slice(1)) {
+      this.g.lineTo(p.x * this.g_width, p.y * this.g_height);
+    }
+    this.g.stroke();
+  }
+
   redraw() {
     this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
     this.draw_ray();
     this.draw_media_transitions();
+    if (this.are_we_showing_snell) this.draw_what_snell_predicts();
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
