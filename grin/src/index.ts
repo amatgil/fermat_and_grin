@@ -186,7 +186,7 @@ export class ExperimentGrin {
         let region_height_pixels = this.g_height*region_height/(2*this.radi_fibra);
         for (let i = 0; i < this.num_regions; ++i) {
             let j = this.num_regions-i-1;
-            let blue = 200*((this.n1 - this.ns[(this.num_regions - 1)-i]) / (this.n1 * this.delta));
+            let blue = 200 - 200*((this.n1 - this.ns[(this.num_regions - 1)-i]) / (this.n1 * this.delta));
             this.g.fillStyle = `rgb(0, ${blue}, ${blue})`
             let rect_height = region_height_pixels + region_height_pixels*2*j; 
             let bottom_y = this.g_height/2- rect_height/2;
