@@ -91,8 +91,44 @@ export class ExperimentGrin {
 
 
 
-  redraw() {}
+  redraw() {
+    this.draw_media_backgrounds();
+  }
+
+  draw_media_backgrounds() {
+    const num_transicions = this.ns.length;
+    for (let i = 0; i < num_transicions - 1; ++i) {
+      let x = (i /((num_transicions * 2) - 1)) * this.g_height;
+      let a = ((this.n1 - this.ns[(num_transicions - 1)-i]) / (this.n1 * this.delta)); // perquè els limits son 1 i 2
+      this.g.fillStyle =`rgba(0, 0, 240, ${a})`;
+
+      this.g.beginPath();
+      this.g.fillRect(
+        0,
+        x,
+        this.g_width,
+        (1 / ((num_transicions * 2) - 1)) * this.g_height,
+      );
+      this.g.stroke();
+    }
+    for (let i = 0; i < num_transicions; ++i) {
+      let x = ((i+num_transicions - 1) /((num_transicions * 2) - 1)) * this.g_height;
+      let a = (this.n1 - this.ns[i]) / (this.n1 * this.delta); // perquè els limits son 1 i 2
+      this.g.fillStyle =`rgba(0, 0, 240, ${a})`;
+
+      this.g.beginPath();
+      this.g.fillRect(
+        0,
+        x,
+        this.g_width,
+        (1 / ((num_transicions * 2) - 1)) * this.g_height,
+      );
+      this.g.stroke();
+    }
+  }
 }
+
+
 
 function start() {
   const canvas = document.getElementById("c") as HTMLCanvasElement;
@@ -106,6 +142,9 @@ function start() {
   const g = canvas.getContext("2d") as CanvasRenderingContext2D;
   const experiment = new ExperimentGrin(g, width, height);
   init_listeners(experiment);
+
+  experiment.compute_indices_of_refraction_array();
+  console.log(experiment.ns);
 
   experiment.redraw();
 }
