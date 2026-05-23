@@ -5,7 +5,7 @@ const REAL_HEIGHT: number = 5;
 const TAU = 6.28318530717958647692;
 const PI = TAU / 2;
 
-const DELTA_IN_STEPS = 0.025;
+const DELTA_IN_STEPS = 0.045;
 const TEMPS_ENTRE_STEPS = 10; // en millisegons
 
 // TOTES les coordenades son normalitzades ([0..1]), i (0, 0) és top-left
@@ -101,13 +101,22 @@ export class ExperimentFermat {
       //    |  /
       //    +   <--- prev_point
 
-      const l = meeting_point.y - prev_point.y;
-      const a = Math.atan(l); // tan(a) = l/1 => a = atan(l)
-      const h = 1 / Math.cos(a); // cos(a) = 1/h => h = 1/cos(a)
+      // const l = meeting_point.y - prev_point.y;
+      // const a = Math.atan(l); // tan(a) = l/1 => a = atan(l)
+      // const h = 1 / Math.cos(a); // cos(a) = 1/h => h = 1/cos(a)
+      //this.angles_pel_print.push(a);
+
+      //let vel = 1 / this.ns[i];
+      //ret += h / vel;
+      //prev_point = meeting_point;
+
+      const a = Math.atan(Vec2.sub(meeting_point, prev_point).y);
+      const dist = 1 / Math.cos(a);
       this.angles_pel_print.push(a);
 
       let vel = 1 / this.ns[i];
-      ret += h / vel;
+
+      ret += dist / vel;
       prev_point = meeting_point;
     }
 
@@ -257,7 +266,7 @@ export class ExperimentFermat {
   }
 
   redraw() {
-    this.refresh_inputs();
+    if (this.descent_timer_id === null) this.refresh_inputs();
     this.g.clearRect(0, 0, this.g_width, this.g_height);
     this.draw_media_backgrounds();
     this.draw_ray();

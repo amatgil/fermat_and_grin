@@ -66,20 +66,14 @@ export function init_listeners(exp: ExperimentFermat) {
   print_res?.addEventListener("click", () => {
     console.log("<RESULTATS>");
     console.log("Indexs: ", exp.ns);
-    console.log(
-      "Angles",
-      exp.angles_pel_print.map((a) => (TAU / 4 - a).toFixed(2)),
-    );
-    let snell = [];
-    for (let i = 0; i < exp.angles_pel_print.length - 1; ++i) {
-      const n1 = exp.ns[i];
-      const n2 = exp.ns[i + 1];
-      const a1 = exp.angles_pel_print[i];
-      const a2 = exp.angles_pel_print[i + 1];
-      snell.push([(n1 * Math.sin(a1)) / n2, a2]);
+    console.log("Angles", exp.angles_pel_print);
+    const vueltas = exp.ns.length;
+    for (let i = 0; i < vueltas - 1; ++i) {
+      const a = exp.ns[i] * Math.sin(exp.angles_pel_print[i]);
+      const b = exp.ns[i + 1] * Math.sin(exp.angles_pel_print[i + 1]);
+      console.log("Snell ens diu que:", a.toFixed(3), "=", b.toFixed(3));
     }
 
-    console.log("Snell haguès predit:", snell);
     console.log("</RESULTATS>");
   });
 }
