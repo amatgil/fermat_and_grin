@@ -30,13 +30,13 @@ export class ExperimentGrin {
 
     this.n1 = 1.47;
     this.delta = 0.01;
-    this.num_regions = 40;
-    this.radi_fibra = 1; // Ni idea de quines unitats posar lmao
+    this.num_regions = 5;
+    this.radi_fibra = this.g_height/2; // Ni idea de quines unitats posar lmao
 
     this.angle_raig = degToRad(10); // En radians
     this.height_raig = 0;
     this.alpha = 2;
-    this.cable_length = 1000; // En metres (suposo)
+    this.cable_length = this.g_width; // En metres (suposo)
     this.ns = [];
     this.boundary_heights = [];
     this.ray_points = []
@@ -67,8 +67,10 @@ export class ExperimentGrin {
 
   compute_indices_of_refraction_array() {
     this.ns = [];
+    let region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
     for (let i = 0; i < this.num_regions; ++i) {
-        let r = this.radi_fibra*(i/this.num_regions);
+        //let r = this.radi_fibra*(i/this.num_regions);
+        let r = i*region_height;
         let n = ExperimentGrin.compute_index_of_refraction(this.num_regions, this.delta, this.n1, this.alpha, this.radi_fibra, r);
         this.ns.push(n);
     }
@@ -102,8 +104,31 @@ export class ExperimentGrin {
     //  - Cap a baix: -1
     let sign = this.angle_raig/Math.abs(this.angle_raig);
 
+
+    console.log("Sign", sign);
     let current_region = 0; // Crec que sempre ha de començar en mig
     let current_point = new Vec2(0, this.height_raig);
+
+    // REFRACCIÓ
+    let _n1 = this.ns[Math.abs(current_region)];
+    let _n2 = this.ns[Math.abs(current_region+sign)];
+    theta_out = this.compute_refracted_angle(_n1, theta_in, _n2);
+
+    if (isNaN(theta_out)) {  // Reflexió total interna
+        theta_out = theta_in;
+        sign *= -1;
+    }
+    
+    points.push(new Vec2(current_point.x, current_point.y))
+
+    let delta_x =  region_height/2*Math.tan(theta_out);
+      
+    current_point.x += delta_x;
+    current_point.y += region_height/2*sign;
+    points.push(new Vec2(current_point.x, current_point.y));
+    
+    // 3. Passar a la següent regió
+    theta_in = theta_out;
 
     while (current_point.x < this.cable_length) {
 
@@ -118,6 +143,11 @@ export class ExperimentGrin {
             // REFRACCIÓ
             let n1 = this.ns[Math.abs(current_region)];
             let n2 = this.ns[Math.abs(current_region+sign)];
+
+            console.log(
+              "current region:", current_region,
+              `${current_region} -> ${current_region+sign}`, "(" + n1 + ", " + n2 + ")"
+            );
             theta_out = this.compute_refracted_angle(n1, theta_in, n2);
 
             if (isNaN(theta_out)) {  // Reflexió total interna
@@ -140,17 +170,38 @@ export class ExperimentGrin {
     this.ray_points = points;
   }
 
-  redraw() {
+  draw_ray() {
     let [x_prev, y_prev] = [0, this.g_height/2];
     for (let p of this.ray_points) {
         let x = (p.x/this.cable_length)*this.g_width;
-        let y = (p.y+this.radi_fibra)/(2*this.radi_fibra)*this.g_height;
+        let y = (-p.y+this.radi_fibra)/(2*this.radi_fibra)*this.g_height;
         this.g.beginPath();
         this.g.moveTo(x_prev, y_prev);
         this.g.lineTo(x, y);
         this.g.stroke();
         [x_prev, y_prev] = [x, y];
     }
+  }
+
+  draw_background() {
+    let region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
+    let region_height_pixels = this.g_height*region_height/(2*this.radi_fibra);
+    for (let i = 0; i < this.num_regions; ++i) {
+      let j = this.num_regions-i-1;
+      let blue = 255*i/this.num_regions;
+      this.g.fillStyle = `rgb(0, 0, ${blue})`
+      let rect_height = region_height_pixels + region_height_pixels*2*j; 
+      let bottom_y = this.g_height/2- rect_height/2;
+      this.g.fillRect(0, bottom_y, this.g_width, rect_height);
+    }
+  }
+  redraw() {
+    this.draw_background();
+    this.g.strokeStyle = "red"
+    this.g.stroke
+    this.g.lineWidth = 4;
+    this.draw_ray();
+
   }
 }
 
