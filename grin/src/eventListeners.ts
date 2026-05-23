@@ -40,7 +40,7 @@ export function init_listeners(exp: ExperimentGrin) {
       inputId: "input_angle_raig",
       getValue: () => radiansToDegrees(exp.angle_raig),
       setValue: (value: number) => { exp.angle_raig = degreesToRadians(value); },
-      formatValue: (value: number) => String(Math.round(value)),
+      formatValue: (value: number) => value.toFixed(1),
     },
     {
       sliderId: "slider_aspect_ratio",
