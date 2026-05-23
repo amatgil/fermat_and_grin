@@ -43,13 +43,13 @@ export class ExperimentFermat {
     let snell: number[] = [];
     this.what_snell_predicts().forEach((e) => snell.push(e.y));
     let ray = [0.5].concat(this.media_change_verticals);
-    console.log(snell.length, " -> ", snell);
-    console.log(ray.length, " -> ", ray);
+    //console.log(snell.length, " -> ", snell);
+    //console.log(ray.length, " -> ", ray);
     let res: number[] = [];
     for (let i in ray) {
       res.push((ray[i] - snell[i]) * (ray[i] - snell[i]));
     }
-    console.log(res);
+    //console.log(res);
     return res;
   }
 
@@ -63,8 +63,8 @@ export class ExperimentFermat {
       arry.push(element.y as number);
     });
 
-    console.log(`X: ${arrx}`);
-    console.log(`Y: ${arry}`);
+    //console.log(`X: ${arrx}`);
+    //console.log(`Y: ${arry}`);
     this.g.beginPath();
 
     const N = this.ns.length;
@@ -335,7 +335,7 @@ export class ExperimentFermat {
       const B = heights[i + 1];
 
       //console.log(A, B, n1, n2)
-      console.log("num transicions:", num_transicions);
+      //console.log("num transicions:", num_transicions);
       let h = ExperimentFermat.refractedHeight_with_newton(A, B, n1, n2);
       let meeting_point = new Vec2(i / num_transicions, h);
       ret.push(meeting_point);
