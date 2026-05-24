@@ -38,19 +38,35 @@ export class ExperimentFermat {
   set_default_parameters() {
     // TODO
   }
+
+  compute_snell_distances(): number[] {
+    let snell: number[] = [];
+    this.what_snell_predicts().forEach((e) => snell.push(e.y));
+    let ray = [0.5].concat(this.media_change_verticals);
+    //console.log(snell.length, " -> ", snell);
+    //console.log(ray.length, " -> ", ray);
+    let res: number[] = [];
+    for (let i in ray) {
+      res.push((ray[i] - snell[i]) * (ray[i] - snell[i]));
+    }
+    //console.log(res)
+    res.pop();
+    return res;
+  }
+
   overlay_snell() {
     this.g.strokeStyle = "green";
-    let arrx: number[] =[]; 
-    let arry: number[] =[]; 
+    let arrx: number[] = [];
+    let arry: number[] = [];
     let punts = this.what_snell_predicts();
-    punts.forEach((element) => {arrx.push(element.x as number);
-                                arry.push(element.y as number);
+    punts.forEach((element) => {
+      arrx.push(element.x as number);
+      arry.push(element.y as number);
     });
 
-    console.log(`X: ${arrx}`);
-    console.log(`Y: ${arry}`);
+    //console.log(`X: ${arrx}`);
+    //console.log(`Y: ${arry}`);
     this.g.beginPath();
-
 
     const N = this.ns.length;
     this.g.moveTo(punts[0].x * this.g_width, punts[0].y * this.g_height); // assumeixo que no està buit, que hauria de ser correcte crec
@@ -193,6 +209,7 @@ export class ExperimentFermat {
       canvas_elem.style.border = "5px solid green";
     }
   }
+
   unset_compute_indicator() {
     const canvas_elem = document.getElementById("c");
     if (canvas_elem?.style != undefined) {
@@ -215,13 +232,14 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    const max_iterations_allowed = iterations < 20000 * this.ns.length;
-    while (keep_going && max_iterations_allowed) {
+    const max_iterations_allowed = 2000 * this.ns.length;
+    while (keep_going && iterations < max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
-      const index_to_tweak = Math.floor(
-        Math.random() * (this.media_change_verticals.length - 1),
-      );
+      //   const index_to_tweak = Math.floor(
+      //     Math.random() * (this.media_change_verticals.length - 1),
+      //   );
+      const index_to_tweak = weighted_index(this.compute_snell_distances());
 
       let delta = Math.random() * DELTA_IN_STEPS;
       if (Math.random() < 0.5) delta = delta * -1;
@@ -257,14 +275,13 @@ export class ExperimentFermat {
     }
   }
 
-
   static refractedHeight_with_newton(
     A: number,
     B: number,
     n1: number,
     n2: number,
     tolerance = 1e-4,
-    maxIterations = 50
+    maxIterations = 50,
   ): number {
     // First choice:
     let y = (A + B) / 2;
@@ -275,16 +292,16 @@ export class ExperimentFermat {
 
       // f(y)
       const f =
-        n1 * L1 / Math.sqrt(1 + L1 * L1) -
-        n2 * L2 / Math.sqrt(1 + L2 * L2);
+        (n1 * L1) / Math.sqrt(1 + L1 * L1) - (n2 * L2) / Math.sqrt(1 + L2 * L2);
 
       // f'(y) [Trobada utilitzant matlab jajajaja]
-      const fp = 
-          + (n1*(A - y)*(2*A - 2*y))/(2*Math.pow((A - y)*(A - y) + 1, 3/2)) 
-          - n2/Math.sqrt((B - y)*(B - y) + 1) 
-          - n1/Math.sqrt((A - y)*(A - y) + 1) 
-          + (n2*(B - y)*(2*B - 2*y))/(2*Math.pow((B - y)*(B - y) + 1, 3/2))
-
+      const fp =
+        +(n1 * (A - y) * (2 * A - 2 * y)) /
+          (2 * Math.pow((A - y) * (A - y) + 1, 3 / 2)) -
+        n2 / Math.sqrt((B - y) * (B - y) + 1) -
+        n1 / Math.sqrt((A - y) * (A - y) + 1) +
+        (n2 * (B - y) * (2 * B - 2 * y)) /
+          (2 * Math.pow((B - y) * (B - y) + 1, 3 / 2));
 
       const yNext = y - f / fp;
 
@@ -296,9 +313,7 @@ export class ExperimentFermat {
       y = yNext;
     }
 
-    throw new Error(
-      "didn't converge"
-    );
+    throw new Error("didn't converge");
   }
 
   what_snell_predicts(): Vec2[] {
@@ -313,22 +328,20 @@ export class ExperimentFermat {
     ret.push(this.ray_start);
     let heights = [0.5].concat(this.media_change_verticals);
     const N = heights.length;
-    for (let i = 1; i < N-1; ++i) {
-      const n1: number = this.ns[i-1];
+    for (let i = 1; i < N - 1; ++i) {
+      const n1: number = this.ns[i - 1];
       const n2: number = this.ns[i];
 
-      const A = heights[i-1];
-      const B = heights[i+1];
+      const A = heights[i - 1];
+      const B = heights[i + 1];
 
       //console.log(A, B, n1, n2)
-      console.log("num transicions:", num_transicions);
-      let h = ExperimentFermat.refractedHeight_with_newton(A,B,n1,n2);
-      let meeting_point = new Vec2(
-        (i) / (num_transicions), 
-        h);
+      //console.log("num transicions:", num_transicions);
+      let h = ExperimentFermat.refractedHeight_with_newton(A, B, n1, n2);
+      let meeting_point = new Vec2(i / num_transicions, h);
       ret.push(meeting_point);
     }
-    ret.push(new Vec2(1, heights[N-1]))
+    ret.push(new Vec2(1, heights[N - 1]));
     return ret;
   }
   draw_what_snell_predicts() {
@@ -455,3 +468,31 @@ export function energyData(exp: ExperimentFermat, index: number): string {
 function clamp(x: number, lower: number, upper: number): number {
   return Math.min(Math.max(lower, x), upper);
 }
+
+export function distances_to_probabilities(dists: number[]): number[] {
+  const exps = dists.map(Math.exp); // e^dists
+  const suma = exps.reduce((a, b) => a + b); // sum e^dists
+  return exps.map((e) => e / suma); // e^dists / (sum e^dists)
+}
+
+// Typescript no té scans??
+function sumscan(arr: number[]): number[] {
+  let result: number = 0;
+  return arr.map((item) => (result += item));
+}
+
+// Retorna un index, on les distancies² s'interpreten com pesos segons softmax
+// 'dists' no pot estar buit
+export function weighted_index(dists: number[]): number {
+  const probs = distances_to_probabilities(dists);
+  const pdf = sumscan(probs);
+  const generated = Math.random();
+  for (let i = 0; i < pdf.length; ++i) {
+    if (pdf[i] > generated) return i - 1;
+  }
+  throw Error("La cdf no suma 1!!!");
+}
+
+// per debugar
+(window as any).weighted_index = weighted_index;
+(window as any).distances_to_probabilities = distances_to_probabilities;

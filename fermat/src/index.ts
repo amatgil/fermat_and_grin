@@ -15,7 +15,7 @@ function start() {
   init_listeners(experiment);
 
   experiment.redraw();
-
+  experiment.compute_snell_distances();
   (window as any).exp = experiment;
 }
 
