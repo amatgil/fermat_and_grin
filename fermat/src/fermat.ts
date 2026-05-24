@@ -491,9 +491,8 @@ export function weighted_index(dists: number[]): number {
   const pdf = sumscan(probs);
   const generated = Math.random();
   for (let i = 0; i < pdf.length; ++i) {
-    if (pdf[i] > generated) return i;
+    if (pdf[i] > generated) return i - 1;
   }
-  console.log("WHOOPS");
   throw Error("La cdf no suma 1!!!");
 }
 
