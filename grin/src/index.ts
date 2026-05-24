@@ -27,6 +27,7 @@ export class ExperimentGrin {
     cable_length: number;
     ns: number[];
     ray_points: Vec2[];
+    array_for_print: any[];
 
     constructor(g: CanvasRenderingContext2D, width: number, height: number) {
     this.g = g;
@@ -46,6 +47,7 @@ export class ExperimentGrin {
     this.cable_length = 2*this.radi_fibra*this.aspect_ratio; // En metres (suposo)
     this.ns = [];
     this.ray_points = []
+    this.array_for_print = [];
     }
 
     /**
@@ -97,6 +99,8 @@ export class ExperimentGrin {
 
         let critical_angle = Math.asin(n2/n1);
 
+        let old_region = current_region; // Just for the print!
+        let old_direction = direction;
         if (theta_in >= critical_angle) {
             // Reflexió total interna:
             theta_out = theta_in;
@@ -107,6 +111,7 @@ export class ExperimentGrin {
             current_region += direction;
         }
 
+        this.array_for_print.push([old_region, current_region, theta_in*old_direction, theta_out*direction]);
 
         // 2. Trobar els desplaçaments que pot fer en X i en Y fins entrar en una nova regió
         let delta_x = this.region_height*Math.tan(theta_out);
@@ -126,9 +131,10 @@ export class ExperimentGrin {
     compute_ray_points() {
 
         this.ray_points = [];
+        this.array_for_print = [];
         let n0 = 1.0 // El raig comença a l'aire
         let n1 = this.ns[0];
-
+        
         let theta_in = this.angle_raig;
         // Angle with respect to the horizontal
         let theta_out = this.compute_refracted_angle(n0, theta_in, n1); 

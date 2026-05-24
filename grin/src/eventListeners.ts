@@ -96,4 +96,30 @@ export function init_listeners(exp: ExperimentGrin) {
   }
 
   controlBindings.forEach(bindControl);
+
+  const output_area = document.getElementById("output") as HTMLTextAreaElement;
+  const print_angles = document.getElementById("print_angles") as HTMLButtonElement;
+  
+  output_area.value = ""
+
+  function add_padding_to_num(x: number, precision: number = 4): string {
+    let res = x.toFixed(precision);
+    if (x >= 0) return " ".concat(res);
+    return res;
+  }
+
+  print_angles.addEventListener("click", () => {
+    output_area.value = "";
+    let angles_array: string[] = [];
+    output_area.value += ` R1 -> R2: \t  θ_in -> θ_out\n`
+    exp.array_for_print.forEach(([region_1, region_2, theta_in, theta_out]) => {
+      let reg_1 = add_padding_to_num(region_1, 0);
+      let reg_2 = add_padding_to_num(region_2, 0);
+      let t_in  = add_padding_to_num(radiansToDegrees( theta_in));
+      let t_out = add_padding_to_num(radiansToDegrees(theta_out));
+      output_area.value += 
+          `${reg_1} -> ${reg_2}: \t ${t_in}º -> ${t_out}º\n`
+    }
+    );
+  }) 
 }
