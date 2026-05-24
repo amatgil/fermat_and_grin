@@ -358,7 +358,7 @@ export class ExperimentFermat {
     const time_report = document.getElementById("time_taken");
     if (time_report === null) throw Error("algú ha borrat lo del temps");
 
-    time_report.innerHTML = this.compute_time().toString();
+    time_report.innerHTML = this.compute_time().toFixed(10);
   }
 
   randomitza_valors_existents() {
@@ -376,63 +376,61 @@ export class ExperimentFermat {
     {
       const nss = document.getElementById("input_ns");
       let indexs: number[] = [];
-      if (nss?.childNodes === undefined) {
+      if (!nss) {
         throw Error("Whoopsie");
       }
 
-      for (const child of nss?.childNodes) {
-        if (child instanceof HTMLInputElement) {
-          indexs.push(Number(child.value));
-        } else {
-          throw Error("Unreachable");
-        }
-      }
+      const rangeInputs = nss.querySelectorAll<HTMLInputElement>("input[type='range']");
+      rangeInputs.forEach((input) => {
+        indexs.push(Number(input.value));
+      });
       this.ns = indexs;
     }
     {
       const hs = document.getElementById("input_heights");
       let heights: number[] = [];
-      if (hs?.childNodes === undefined) {
+      if (!hs) {
         throw Error("Whoopsie");
       }
 
-      for (const child of hs?.childNodes) {
-        if (child instanceof HTMLInputElement) {
-          heights.push(Number(child.value));
-        } else {
-          throw Error("Unreachable");
-        }
-      }
+      const rangeInputs = hs.querySelectorAll<HTMLInputElement>("input[type='range']");
+      rangeInputs.forEach((input) => {
+        heights.push(Number(input.value));
+      });
       this.media_change_verticals = heights;
     }
   }
   refresh_outputs() {
     {
       const nss = document.getElementById("input_ns");
-      if (nss?.childNodes === undefined) {
+      if (!nss) {
         throw Error("Whoopsie");
       }
 
-      nss.childNodes.forEach((child, i) => {
-        if (child instanceof HTMLInputElement) {
-          child.value = this.ns[i].toString();
-        } else {
-          throw Error("Unreachable");
+      const rangeInputs = nss.querySelectorAll<HTMLInputElement>("input[type='range']");
+      rangeInputs.forEach((slider, i) => {
+        const value = this.ns[i]?.toString() ?? slider.value;
+        slider.value = value;
+        const numberInput = slider.parentElement?.querySelector<HTMLInputElement>("input[type='number']");
+        if (numberInput) {
+          numberInput.value = value;
         }
       });
     }
 
     {
       const hs = document.getElementById("input_heights");
-      if (hs?.childNodes === undefined) {
+      if (!hs) {
         throw Error("Whoopsie");
       }
 
-      hs.childNodes.forEach((child, i) => {
-        if (child instanceof HTMLInputElement) {
-          child.value = this.media_change_verticals[i].toString();
-        } else {
-          throw Error("Unreachable");
+      const rangeInputs = hs.querySelectorAll<HTMLInputElement>("input[type='range']");
+      rangeInputs.forEach((slider, i) => {
+        const value = this.media_change_verticals[i]?.toString() ?? slider.value;
+        slider.value = value;
+        const numberInput = slider.parentElement?.querySelector<HTMLInputElement>("input[type='number']");
+        if (numberInput) {
+          numberInput.value = value;
         }
       });
     }

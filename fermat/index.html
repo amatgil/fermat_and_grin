@@ -14,31 +14,39 @@
     </head>
     <body onload="start()">
         <canvas id="c" style="border: 5px solid #000000"></canvas>
-        <div style="border: 2px solid black; width: fit-content; padding: 5px">
-            <label>Temps</label>
-            <div><span id="time_taken">0</span><span>s</span></div>
-        </div>
-        <div style="border: 2px solid black; width: fit-content">
-            <label>Valors per secció</label>
-            <button id="add_index_refrac">Afegeix-ne un</button>
-            <button id="remove_index_refrac">Elimina'n un</button>
-            <button id="randomitza_valors_existents">
-                Randomitza els existents
-            </button>
-            <div>
-                <label>Punt de transició</label>
-                <div id="input_heights"></div>
+        <div style="display: flex;">
+            <div style="border: 2px solid black; width: fit-content; padding: 5px">
+                <label>Temps</label>
+                <div><span id="time_taken">0</span><span>s</span></div>
             </div>
-            <div>
-                <label>Indexs de refracció</label>
-                <div id="input_ns"></div>
+            <div style="border: 2px solid black; width: fit-content">
+                <label>Valors per secció</label>
+                <button id="add_index_refrac">Afegeix-ne un</button>
+                <button id="remove_index_refrac">Elimina'n un</button>
+                <button id="randomitza_valors_existents">
+                    Randomitza els existents
+                </button>
+                <div style="display:flex;">
+                    <div>
+                        <label>Punt de transició</label>
+                        <div id="input_heights"></div>
+                    </div>
+                    <div>
+                        <label>Indexs de refracció</label>
+                        <div id="input_ns"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="border: 2px solid black;">
+                <div style="width: fit-content">
+                    <label>Control descent</label>
+                    <button id="start_animation_button">Inicia Descent</button>
+                    <button id="stop_animation_button">Para Descent</button>
+                    <button id="imprimeix_resultat">Imprimeix indexs i angles</button>
+                </div>
+                <textarea id="output" rows="10" cols="100"></textarea>
             </div>
         </div>
-        <div style="border: 2px solid black; width: fit-content">
-            <label>Control descent</label>
-            <button id="start_animation_button">Inicia Descent</button>
-            <button id="stop_animation_button">Para Descent</button>
-            <button id="imprimeix_resultat">Imprimeix indexs i angles</button>
-        </div>
+        
     </body>
 </html>
