@@ -50,7 +50,7 @@ export class ExperimentFermat {
       res.push((ray[i] - snell[i]) * (ray[i] - snell[i]));
     }
     //console.log(res)
-    res.pop()
+    res.pop();
     return res;
   }
 
@@ -473,7 +473,7 @@ function clamp(x: number, lower: number, upper: number): number {
 }
 
 export function distances_to_probabilities(dists: number[]): number[] {
-  const exps = dists.map((x) => Math.exp(x)); // e^dists
+  const exps = dists.map(Math.exp); // e^dists
   const suma = exps.reduce((a, b) => a + b); // sum e^dists
   return exps.map((e) => e / suma); // e^dists / (sum e^dists)
 }
@@ -488,10 +488,14 @@ function sumscan(arr: number[]): number[] {
 // 'dists' no pot estar buit
 export function weighted_index(dists: number[]): number {
   const probs = distances_to_probabilities(dists);
-  const pdf = sumscan(dists);
-  const generated = Math.floor(Math.random() * pdf[pdf.length - 1]);
+  const pdf = sumscan(probs);
+  const generated = Math.random();
   for (let i = 0; i < probs.length; ++i) {
-    if (pdf[i] > generated) return i - 1;
+    if (pdf[i] > generated) return i;
   }
   return pdf.length - 1;
 }
+
+// per debugar
+(window as any).weighted_index = weighted_index;
+(window as any).distances_to_probabilities = distances_to_probabilities;
