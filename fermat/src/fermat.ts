@@ -490,10 +490,11 @@ export function weighted_index(dists: number[]): number {
   const probs = distances_to_probabilities(dists);
   const pdf = sumscan(probs);
   const generated = Math.random();
-  for (let i = 0; i < probs.length; ++i) {
+  for (let i = 0; i < pdf.length; ++i) {
     if (pdf[i] > generated) return i;
   }
-  return pdf.length - 1;
+  console.log("WHOOPS");
+  throw Error("La cdf no suma 1!!!");
 }
 
 // per debugar
