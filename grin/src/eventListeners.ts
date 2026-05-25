@@ -13,6 +13,7 @@ function radiansToDegrees(rad: number): number {
 }
 
 export function init_listeners(exp: ExperimentGrin) {
+  const time_taken = document.getElementById("time_taken") as HTMLSpanElement;
   const controlBindings = [
     {
       sliderId: "slider_n1",
@@ -74,6 +75,7 @@ export function init_listeners(exp: ExperimentGrin) {
       if (!Number.isFinite(value)) return;
       binding.setValue(value);
       exp.compute_ray_points();
+      time_taken.innerHTML = exp.array_for_print[exp.array_for_print.length-1][4].toFixed(10);
       exp.redraw();
       updateDomValue(binding.getValue());
     };
@@ -111,14 +113,16 @@ export function init_listeners(exp: ExperimentGrin) {
   print_angles.addEventListener("click", () => {
     output_area.value = "";
     let angles_array: string[] = [];
-    output_area.value += ` R1 -> R2: \t  θ_in -> θ_out\n`
-    exp.array_for_print.forEach(([region_1, region_2, theta_in, theta_out]) => {
+    output_area.value += ` R1 -> R2: \t  θ_in -> θ_out \t\t timestamp\n`
+    exp.array_for_print.forEach(([region_1, region_2, theta_in, theta_out, timestamp]) => {
+      if (isNaN(region_1) || isNaN(region_2) || isNaN(theta_in) || isNaN(theta_out) || isNaN(timestamp)) return;
+      
       let reg_1 = add_padding_to_num(region_1, 0);
       let reg_2 = add_padding_to_num(region_2, 0);
       let t_in  = add_padding_to_num(radiansToDegrees( theta_in));
       let t_out = add_padding_to_num(radiansToDegrees(theta_out));
       output_area.value += 
-          `${reg_1} -> ${reg_2}: \t ${t_in}º -> ${t_out}º\n`
+          `${reg_1} -> ${reg_2}: \t ${t_in}º -> ${t_out}º \t ${timestamp}\n`
     }
     );
   }) 

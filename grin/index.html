@@ -25,12 +25,56 @@
             .param-row input[type="number"] {
                 width: 90px;
             }
+            .grid-container {
+                display: grid;
+                grid-template-columns: min-content min-content auto;
+            }
+
+            .grid-container div {
+                padding: 10px;
+                font-size: 30px;
+                text-align: center;
+            }
+
+            .vertical-size-display {
+                max-width: 2em;
+                border-left: 1px solid black;
+                writing-mode: vertical-lr;
+                text-orientation: mixed;
+                font-size: 5;
+            }
+            .horizontal-size-display {
+                border-top: 1px solid black;
+                max-height: 2em;
+                font-size: 5;
+            }
+            .regular-container {
+                display:flex; 
+                flex-direction:column; 
+                border: 2px solid black; 
+                width: fit-content; 
+                padding: 5px;
+            }
         </style>
     </head>
     <body onload="start()">
-        <canvas id="c" style="border: 2px solid #000000"></canvas>
+        <div class="grid-container">
+            <canvas id="c" style="border: 2px solid #000000"></canvas>
+            <div class="vertical-size-display"> 
+                <span>Height = </span>
+                <span id="height_display"></span>
+                <span> µm</span> 
+            </div>
+            <span></span>
+            <div class="horizontal-size-display"> 
+                <span>Width = </span>
+                <span id="width_display"></span>
+                <span> µm</span> 
+            </div>
+        </div>
+        
         <div style="display: flex;">
-            <div style="border: 2px solid black; width: fit-content; padding: 5px">
+            <div class="regular-container">
                 <label>Experiment parameters</label>
                 <div class="param-row">
                     <label for="slider_n1">n1 </label>
@@ -49,8 +93,8 @@
                 </div>
                 <div class="param-row">
                     <label for="slider_angle_raig">Angle Raig</label>
-                    <input id="slider_angle_raig" type="range" min="1" max="60" step="0.1" />
-                    <input id="input_angle_raig" type="number" min="1" max="60" step="0.1" />
+                    <input id="slider_angle_raig" type="range" min="0.1" max="60" step="0.1" />
+                    <input id="input_angle_raig" type="number" min="0.1" max="60" step="0.1" />
                 </div>
                 <div class="param-row">
                     <label for="slider_aspect_ratio">Aspect Ratio</label>
@@ -63,10 +107,15 @@
                     <input id="input_alpha" type="number" min="0.2" max="6.0" step="0.1" />
                 </div>
             </div> 
-            <div style="display:flex; flex-direction:column; border: 2px solid black; width: fit-content; padding: 5px">
+            <div class="regular-container">
                 <label for="output">Output:</label>
                 <textarea id="output" rows="20" cols="100"></textarea>
                 <button id="print_angles">Print Angles</button>
+            </div>
+            <div class="regular-container" style="font-size: 20px">
+                <label><b>Temps</b></label>
+                <div><span id="time_taken">0</span><span>fs</span></div>
+                <label>1 femtosegon = 10<sup>-15</sup> s</label>
             </div>
         </div>
     </body>

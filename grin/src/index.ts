@@ -7,6 +7,7 @@ return (deg/360)*2*Math.PI;
 
 const PADDING = 100;
 let PADDING_LEFT = PADDING;
+const SPEED_OF_LIGHT = 0.299792; // µm / fs
 
 export class ExperimentGrin {
     g: CanvasRenderingContext2D;
@@ -27,7 +28,8 @@ export class ExperimentGrin {
     cable_length: number;
     ns: number[];
     ray_points: Vec2[];
-    array_for_print: any[];
+                //   region1, region2, thetaIn, thetaOut, timestamp
+    array_for_print: [number,  number,  number, number,   number][];
 
     constructor(g: CanvasRenderingContext2D, width: number, height: number) {
     this.g = g;
@@ -38,8 +40,10 @@ export class ExperimentGrin {
     this.delta = 0.01;
     this.num_regions = 40;
     this.radi_fibra = 1; // Ni idea de quines unitats posar lmao
+    this.aspect_ratio = 1;
+    this.setAspectRatio(1); // Width / Height
     this.region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
-    this.aspect_ratio = 1; // Width / Height
+    
 
     this.angle_raig = degToRad(10); // En radians
     this.height_raig = 0;
@@ -86,7 +90,7 @@ export class ExperimentGrin {
         return res;
     }
 
-    advance_ray_to_next_doundary(current_region: number, direction: number, theta_in: number) {
+    advance_ray_to_next_doundary(current_region: number, direction: number, theta_in: number, timestamp: number) {
         if (Math.abs(current_region+direction) >= this.num_regions) {
             //throw Error("El raig ha sortit del material! " + current_region);
         }
@@ -111,8 +115,6 @@ export class ExperimentGrin {
             current_region += direction;
         }
 
-        this.array_for_print.push([old_region, current_region, theta_in*old_direction, theta_out*direction]);
-
         // 2. Trobar els desplaçaments que pot fer en X i en Y fins entrar en una nova regió
         let delta_x = this.region_height*Math.tan(theta_out);
         
@@ -122,12 +124,30 @@ export class ExperimentGrin {
         current_point.x += delta_x;
         current_point.y += this.region_height*direction;
 
+        const speed = SPEED_OF_LIGHT/n2;
+        timestamp += Math.sqrt(delta_x*delta_x + this.region_height*this.region_height)/speed;
+        this.array_for_print.push([old_region, current_region, theta_in*old_direction, theta_out*direction, timestamp]);
         this.ray_points.push(current_point);
 
-        return [current_region, theta_out, direction];
+        return [current_region, theta_out, direction, timestamp];
     }
 
+/*
+ R1 -> R2: 	  θ_in -> θ_out 		 timestamp
+ 0 ->  1: 	  83.21º ->  85.55º
+ 1 ->  1: 	  85.55º -> -85.55º
+ 1 ->  0: 	 -85.55º -> -83.21º
+ 0 -> -1: 	 -83.21º -> -85.55º
+-1 -> -1: 	 -85.55º ->  85.55º
+-1 ->  0: 	  85.55º ->  83.21º
+ 0 ->  1: 	  83.21º ->  85.55º
+ 1 ->  1: 	  85.55º -> -85.55º
+ 1 ->  0: 	 -85.55º -> -83.21º
+ 0 -> -1: 	 -83.21º -> -85.55º
+-1 -> -1: 	 -85.55º ->  85.55º
+-1 ->  0: 	  85.55º ->  83.21º
 
+*/
     compute_ray_points() {
 
         this.ray_points = [];
@@ -146,18 +166,42 @@ export class ExperimentGrin {
         //  - Down: -1
         let direction = this.angle_raig/Math.abs(this.angle_raig);
 
+        let old_region = 0;
         let current_region = 0; // Crec que sempre ha de començar en mig
+
         let current_point = new Vec2(
             this.region_height*Math.tan(theta_in)/2, 
             this.region_height*direction/2
         );
         this.ray_points.push(new Vec2(0, 0));
         this.ray_points.push(current_point);
-
+        let timestamp = 0;
         while (current_point.x < this.cable_length) {
-            [current_region, theta_in, direction] = this.advance_ray_to_next_doundary(current_region, direction, theta_in);
+            old_region = current_region;
+            [current_region, theta_in, direction, timestamp] = this.advance_ray_to_next_doundary(current_region, direction, theta_in, timestamp);
             current_point = this.ray_points[this.ray_points.length-1];
         }
+        // Last segment of the ray:
+        const n_i = this.ns[Math.abs(old_region)];
+        const last_point = this.ray_points[this.ray_points.length-2];
+        const dx = this.cable_length-last_point.x;
+        const slope = (current_point.y - last_point.y)/(current_point.x - last_point.x)
+        const dy = dx*slope;
+        const dist = Math.sqrt(dx*dx + dy*dy);
+        timestamp += dist/(SPEED_OF_LIGHT/n_i);
+        console.log("Last timestamp =", timestamp);
+        console.log(
+            `
+            n_i = ${n_i},
+            last_point = (${last_point.x},${last_point.y}),
+            current_point = (${current_point.x},${current_point.y}),
+            dx = ${dx},
+            slope = ${slope},
+            dy = ${dy},
+            dist = ${dist},
+            `
+        )
+        this.array_for_print.push([NaN, NaN, NaN, NaN, timestamp]);
     }
 
 
@@ -235,8 +279,12 @@ export class ExperimentGrin {
 
     setAspectRatio(aspect_ratio: number) {
         this.aspect_ratio = aspect_ratio;
-        this.cable_length = aspect_ratio*2*this.radi_fibra;
+        this.cable_length = aspect_ratio*2*this.radi_fibra*(this.g_width/this.g_height);
         PADDING_LEFT = PADDING/aspect_ratio;
+        const width_display = document.getElementById("width_display") as HTMLSpanElement;
+        const height_display = document.getElementById("height_display") as HTMLSpanElement;
+        height_display.innerHTML = (2*this.radi_fibra).toFixed(5);
+        width_display.innerHTML = this.cable_length.toFixed(5);
     }
 }
 
@@ -258,6 +306,7 @@ init_listeners(experiment);
 experiment.compute_indices_of_refraction_array();
 console.log(experiment.ns);
 experiment.compute_ray_points();
+(document.getElementById("time_taken") as HTMLSpanElement).innerHTML = experiment.array_for_print[experiment.array_for_print.length-1][4].toFixed(10);
 experiment.redraw();
 }
 
