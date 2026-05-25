@@ -7,7 +7,7 @@ return (deg/360)*2*Math.PI;
 
 const PADDING = 100;
 let PADDING_LEFT = PADDING;
-const SPEED_OF_LIGHT = 0.299792; // µm / fs
+const SPEED_OF_LIGHT = 299.792; // µm / ps
 
 export class ExperimentGrin {
     g: CanvasRenderingContext2D;
@@ -39,7 +39,7 @@ export class ExperimentGrin {
     this.n1 = 1.47;
     this.delta = 0.01;
     this.num_regions = 40;
-    this.radi_fibra = 1; // Ni idea de quines unitats posar lmao
+    this.radi_fibra = 25; // Google diu que 25 µm és un radi força estàndard
     this.aspect_ratio = 1;
     this.setAspectRatio(1); // Width / Height
     this.region_height = (2.0*this.radi_fibra)/(2.0*this.num_regions-1.0);
@@ -283,7 +283,7 @@ export class ExperimentGrin {
         PADDING_LEFT = PADDING/aspect_ratio;
         const width_display = document.getElementById("width_display") as HTMLSpanElement;
         const height_display = document.getElementById("height_display") as HTMLSpanElement;
-        height_display.innerHTML = (2*this.radi_fibra).toFixed(5);
+        height_display.innerHTML = (2*this.radi_fibra).toFixed(1);
         width_display.innerHTML = this.cable_length.toFixed(5);
     }
 }
