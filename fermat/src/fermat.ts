@@ -190,8 +190,8 @@ export class ExperimentFermat {
     const num_transicions = this.ns.length;
     for (let i = 0; i < num_transicions; ++i) {
       let x = (i / num_transicions) * this.g_width;
-      let a = this.ns[i] - 1; // perquè els limits son 1 i 2
-      this.g.fillStyle = `rgba(1, 1, 1, ${a})`;
+      let a = 200-200*(this.ns[i] - 1); // perquè els limits son 1 i 2
+      this.g.fillStyle = `rgba(0, ${a}, ${a}, 1)`;
       this.g.beginPath();
       this.g.fillRect(
         x,
@@ -232,7 +232,7 @@ export class ExperimentFermat {
   step_descent() {
     let keep_going = true;
     let iterations = 0;
-    const max_iterations_allowed = 2000 * this.ns.length;
+    const max_iterations_allowed = 20000 * this.ns.length;
     while (keep_going && iterations < max_iterations_allowed) {
       // L'angle si que el podem modificar !!
       // No podem tocar l'últim punt (ni el de l'esquerra de tot ni el de la dreta de tot)
